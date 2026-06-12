@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>四连方实验室 · 拼图工坊</title>
+    <title>基础层作业：瓷饰半成品AI智能质检</title>
     <style>
         * {
             box-sizing: border-box;
@@ -174,8 +174,8 @@
         /* 图形库 */
         .library-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+            gap: 14px;
         }
 
         .library-empty {
@@ -191,12 +191,13 @@
             position: relative;
             border: 1px solid var(--border-soft);
             border-radius: 14px;
-            padding: 12px;
+            padding: 10px;
             background: #FAFCFD;
             display: flex;
             align-items: center;
             justify-content: center;
             aspect-ratio: 1 / 1;
+            overflow: hidden;
         }
 
         .shape-mini {
@@ -204,8 +205,8 @@
             gap: 0;
         }
 
-        .mini-cell { border-radius: 0; }
-        .mini-cell.filled { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35); }
+        .mini-cell { width: 40px; height: 40px; border-radius: 0; }
+        .mini-cell.filled { box-shadow: inset 0 0 0 1px rgba(26, 59, 79, 0.5); }
 
         .delete-btn {
             position: absolute;
@@ -269,7 +270,7 @@
 <div class="app">
     <div class="top-bar">
         <span class="emoji">🧩</span>
-        <h1>四连方实验室</h1>
+        <h1>基础层作业：瓷饰半成品AI智能质检</h1>
     </div>
 
     <div class="workspace">
@@ -499,16 +500,8 @@
 
             const mini = document.createElement('div');
             mini.className = 'shape-mini';
-            mini.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-            mini.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-            mini.style.aspectRatio = `${cols} / ${rows}`;
-            if (cols >= rows) {
-                mini.style.width = '78%';
-                mini.style.height = 'auto';
-            } else {
-                mini.style.height = '78%';
-                mini.style.width = 'auto';
-            }
+            mini.style.gridTemplateColumns = `repeat(${cols}, 40px)`;
+            mini.style.gridTemplateRows = `repeat(${rows}, 40px)`;
 
             const filled = new Set(shape.blocks.map(b => `${b.r},${b.c}`));
             for (let r = 0; r < rows; r++) {
