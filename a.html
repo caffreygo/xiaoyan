@@ -74,7 +74,7 @@
             flex-direction: column;
             overflow: hidden;
             min-width: 0;
-            min-height: 520px;
+            min-height: 580px;
         }
 
         .panel-header {
@@ -254,6 +254,10 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        @media (max-width: 1400px) {
+            .app { width: 96%; }
+        }
+
         @media (max-width: 680px) {
             body { padding: 12px 8px; }
             .app { width: 96%; }
@@ -288,7 +292,7 @@
 
         <div class="panel">
             <div class="panel-header">
-                <span>📦 四连方”纹样库</span>
+                <span>📦 “四连方”纹样库</span>
                 <span class="limit-counter" id="libraryCounter">0 / 5</span>
             </div>
             <div class="panel-body">

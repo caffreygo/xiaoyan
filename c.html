@@ -1,368 +1,888 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>四连方游戏 · 单击旋转</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>拓展层作业：定制瓷板画纹样设计</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    body {
-      background-color: #EBEDD4;
-      font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
+        :root {
+            --primary: #2c7da0;
+            --primary-light: #61a5c2;
+            --primary-hover: #1f5e7a;
+            --danger: #c0473b;
+            --bg: #e8f1f8;
+            --card-bg: #ffffff;
+            --text: #1a3b4f;
+            --text-muted: #6c8da3;
+            --border: #cdddea;
+            --grid-line: #b9d0e2;
+            --cell-empty: #f4f9fd;
+            --seam: rgba(26, 59, 79, 0.5);
+            --shadow: 0 10px 30px rgba(28, 70, 100, 0.12);
+        }
 
-    .game-header {
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(8px);
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid #D9E0D6;
-      z-index: 50;
-    }
-    .game-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #2D593E;
-      letter-spacing: 1px;
-    }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Roboto', 'PingFang SC', '微软雅黑', system-ui, sans-serif;
+            background: linear-gradient(145deg, #d9e6f2 0%, #eef4fa 100%);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 16px;
+        }
 
-    .main-container {
-      flex: 1;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 8px;
-      overflow: hidden;
-    }
-    .canvas-board {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: white;
-      border-radius: 28px;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(0,0,0,0.05);
-      overflow: hidden;
-      touch-action: none;
-    }
+        .app {
+            width: 80%;
+            background: var(--card-bg);
+            border: 3px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    .block-unit {
-      position: absolute;
-      width: var(--grid-size);
-      height: var(--grid-size);
-      box-sizing: border-box;
-      border: 1.5px solid rgba(0, 0, 0, 0.28);
-      border-radius: 0px;
-    }
+        .header {
+            position: relative;
+            padding: 20px 24px;
+            text-align: center;
+            border-bottom: 2px solid #eef4fa;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: clamp(1.3rem, 4vw, 2rem);
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #1f5e7a, #2c7da0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .polyomino-group {
-      position: absolute;
-      cursor: grab;
-      z-index: 20;
-      touch-action: none;
-      opacity: 0.85;
-      transition: opacity 0.15s, filter 0.1s;
-    }
-    .polyomino-group.selected {
-      opacity: 1;
-      z-index: 30;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
-    }
-    .polyomino-group:active { cursor: grabbing; }
+        .help-btn {
+            position: absolute;
+            left: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #fff;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .help-btn:hover { background: var(--primary); color: #fff; }
 
-    /* 右侧工具栏 */
-    #mirror-controls {
-      position: fixed;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: none;
-      flex-direction: column;
-      gap: 14px;
-      z-index: 200;
-    }
-    .mirror-btn {
-      background: #2D593E;
-      color: white;
-      padding: 12px 10px;
-      border-radius: 36px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-      backdrop-filter: blur(4px);
-      background: rgba(45, 89, 62, 0.92);
-      transition: all 0.1s ease;
-      min-width: 68px;
-    }
-    .mirror-btn:active { transform: scale(0.94); background: #1f3f2e; }
+        .controls-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 14px 24px;
+            background: #f0f7fc;
+            border-bottom: 2px solid var(--border);
+        }
+        .divider { width: 2px; height: 26px; background: #cbdde9; margin: 0 4px; }
 
-    /* 右下角浮窗 */
-    .floating-controls {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(30, 30, 28, 0.85);
-      backdrop-filter: blur(12px);
-      border-radius: 48px;
-      padding: 10px 18px;
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      z-index: 250;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.25);
-    }
-    .size-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .size-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0,0,0,0.5);
-      padding: 4px 10px;
-      border-radius: 40px;
-    }
-    .size-item label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #f0f7ea;
-      margin-right: 4px;
-    }
-    .size-stepper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: white;
-      border-radius: 32px;
-      padding: 2px 6px;
-    }
-    .step-btn {
-      width: 26px;
-      height: 26px;
-      background: #2D593E;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      font-size: 1rem;
-      font-weight: bold;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .step-btn:active { transform: scale(0.92); background: #1c3b2b; }
-    .size-item input {
-      width: 48px;
-      background: transparent;
-      border: none;
-      text-align: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #1e3a2f;
-      padding: 4px 0;
-      outline: none;
-    }
-    .size-item span {
-      font-size: 0.7rem;
-      color: #e0e7d6;
-    }
-    .action-btn {
-      background: #ef4444;
-      border: none;
-      color: white;
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 6px 18px;
-      border-radius: 40px;
-      cursor: pointer;
-      transition: 0.1s linear;
-    }
-    .action-btn:active { transform: scale(0.95); background: #dc2626; }
-    .check-action-btn {
-      background: #2D593E;
-      border: none;
-      color: white;
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 6px 18px;
-      border-radius: 40px;
-      cursor: pointer;
-      transition: 0.1s linear;
-    }
-    .check-action-btn:active { transform: scale(0.95); background: #1f4232; }
+        .btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: #e2edf5;
+            color: var(--primary-hover);
+            transition: all 0.15s;
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-1px); }
+        .btn:active:not(:disabled) { transform: translateY(1px); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn.primary { background: linear-gradient(95deg, var(--primary), var(--primary-light)); color: #fff; }
+        .btn.rotate { background: #3b82b6; color: #fff; }
+        .btn.flip { background: #f59e0b; color: #fff; }
+        .btn.danger { background: var(--danger); color: #fff; }
+        .btn.save { background: linear-gradient(95deg, #2E7D32, #43a047); color: #fff; }
 
-    @media (max-width: 640px) {
-      .floating-controls { padding: 8px 14px; gap: 10px; bottom: 14px; right: 14px; }
-      .size-item { padding: 3px 8px; }
-      .step-btn { width: 24px; height: 24px; font-size: 0.9rem; }
-      .size-item input { width: 44px; font-size: 0.75rem; }
-      .action-btn, .check-action-btn { padding: 5px 14px; font-size: 0.75rem; }
-      .mirror-btn { padding: 10px 6px; min-width: 58px; font-size: 0.7rem; }
-    }
+        .workspace {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 18px;
+            padding: 18px;
+        }
 
-    .target-zone {
-      position: absolute;
-      border: 3px dashed #A52A2A;
-      background: rgba(165, 42, 42, 0.03);
-      background-image: 
-        linear-gradient(rgba(165, 42, 42, 0.2) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(165, 42, 42, 0.2) 1px, transparent 1px);
-      background-size: var(--grid-size) var(--grid-size);
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #A52A2A;
-      font-weight: 500;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
+        .panel {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .panel-title {
+            padding: 12px 16px;
+            background: #fafdff;
+            border-bottom: 2px solid #eef4fa;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title .hint {
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: #e8f0fe;
+            padding: 4px 10px;
+            border-radius: 40px;
+            white-space: nowrap;
+        }
 
-    .victory-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(12px);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      visibility: hidden;
-      opacity: 0;
-      transition: visibility 0s, opacity 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    }
-    .victory-modal.active {
-      visibility: visible;
-      opacity: 1;
-    }
-    .victory-card {
-      background: linear-gradient(145deg, #ffffff 0%, #fef9e6 100%);
-      border-radius: 72px;
-      padding: 2rem 3rem;
-      text-align: center;
-      box-shadow: 0 40px 60px rgba(0,0,0,0.4), 0 0 0 8px rgba(255,215,0,0.5);
-      transform: scale(0.7);
-      transition: transform 0.5s ease-out;
-      max-width: 85vw;
-      border: 2px solid #ffd966;
-    }
-    .victory-modal.active .victory-card { transform: scale(1); }
-    .victory-emoji { font-size: 5rem; margin-bottom: 0.5rem; animation: bounce 0.6s ease infinite alternate; }
-    .victory-title { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #2D593E, #F7B32B); background-clip: text; -webkit-background-clip: text; color: transparent; letter-spacing: 2px; margin-bottom: 0.5rem; }
-    .victory-message { font-size: 1.2rem; color: #3c2f1f; font-weight: 500; margin: 0.8rem 0 1.2rem; }
-    .victory-btn { background: #2D593E; border: none; padding: 12px 32px; border-radius: 60px; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; }
-    .victory-btn:active { transform: scale(0.94); background: #1f4232; }
-    @keyframes bounce {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-12px); }
-    }
-    @media (max-width: 550px) {
-      .victory-title { font-size: 2rem; }
-      .victory-message { font-size: 0.9rem; }
-      .victory-card { padding: 1.2rem 1.8rem; border-radius: 48px; }
-      .victory-emoji { font-size: 3rem; }
-    }
-    
-    /* 旋转提示 */
-    .rotate-hint {
-      position: fixed;
-      bottom: 30px;
-      left: 20px;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-      padding: 6px 14px;
-      border-radius: 40px;
-      font-size: 0.7rem;
-      color: #ddd;
-      z-index: 200;
-      pointer-events: none;
-      font-weight: 500;
-    }
-    @media (max-width: 640px) {
-      .rotate-hint { bottom: 80px; font-size: 0.6rem; }
-    }
-  </style>
+        /* 图形库 */
+        .library-list {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 14px;
+            align-content: start;
+        }
+        .lib-item {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #fafdff;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            touch-action: none;
+            overflow: hidden;
+            transition: transform 0.12s, box-shadow 0.12s;
+        }
+        .lib-item:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(44,125,160,0.18); }
+        .lib-item:active { cursor: grabbing; }
+        .lib-mini { display: grid; gap: 0; }
+        .lib-cell { width: 24px; height: 24px; border-radius: 0; }
+        .lib-cell.filled { box-shadow: inset 0 0 0 1px var(--seam); }
+
+        /* 拼摆区 */
+        .puzzle-stage {
+            flex: 1;
+            min-height: 460px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 20% 20%, #f4f9fd, #eaf3fb);
+        }
+        .puzzle-grid {
+            display: grid;
+            gap: 0;
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            overflow: hidden;
+            touch-action: none;
+            box-shadow: 0 6px 18px rgba(44, 125, 160, 0.18);
+        }
+        .pcell {
+            border: 1px solid var(--grid-line);
+            background: var(--cell-empty);
+            min-width: 0;
+            min-height: 0;
+        }
+        .pcell.filled { border-color: var(--seam); }
+        .pcell.preview-ok { outline: 2px dashed #2E7D32; outline-offset: -3px; }
+        .pcell.preview-bad { outline: 2px dashed #c0473b; outline-offset: -3px; }
+
+        /* 方案库 */
+        .scheme-list {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            max-height: 520px;
+            align-content: start;
+        }
+        .scheme-empty {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            text-align: center;
+            padding: 24px 8px;
+            border: 2px dashed #d7e0ea;
+            border-radius: 14px;
+        }
+        .scheme-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #fafdff;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .scheme-card.editing { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(44,125,160,0.25); }
+        .scheme-preview {
+            display: grid;
+            gap: 0;
+            border: 1px solid var(--seam);
+            flex-shrink: 0;
+        }
+        .scheme-cell { width: 14px; height: 14px; }
+        .scheme-cell.filled { box-shadow: inset 0 0 0 1px var(--seam); }
+        .scheme-meta { flex: 1; min-width: 0; }
+        .scheme-name { font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; }
+        .scheme-actions { display: flex; gap: 8px; }
+        .scheme-actions .btn { padding: 5px 12px; font-size: 0.76rem; }
+
+        /* 拖拽幽灵 */
+        .ghost {
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 3000;
+            display: grid; gap: 0; opacity: 0.85;
+        }
+        .ghost-cell.filled { box-shadow: inset 0 0 0 1px var(--seam); }
+
+        /* Toast */
+        .toast-container {
+            position: fixed; top: 120px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction: column; gap: 10px;
+            z-index: 4000; pointer-events: none; align-items: center;
+        }
+        .toast {
+            background: #1e2f3c; color: #fff;
+            padding: 14px 32px; border-radius: 60px;
+            font-size: 1.05rem; font-weight: 700;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+            opacity: 0; transform: translateY(-12px);
+            transition: opacity 0.25s, transform 0.25s;
+            max-width: 90vw; text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { background: var(--primary); }
+        .toast.error { background: var(--danger); }
+
+        /* 模态框 */
+        .modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(30, 60, 80, 0.7); backdrop-filter: blur(4px);
+            z-index: 5000; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: #fff; padding: 28px 32px; border-radius: 24px;
+            width: 480px; max-width: 100%; border-top: 6px solid var(--primary);
+            position: relative; box-shadow: 0 25px 40px rgba(0,0,0,0.2);
+        }
+        .modal-content h2 { margin-top: 0; color: var(--primary); }
+        .modal-content p, .modal-content li { line-height: 1.7; font-size: 0.95rem; }
+        .close-btn {
+            position: absolute; top: 16px; right: 20px;
+            font-size: 1.6rem; color: #8aaec0; cursor: pointer; border: none; background: none;
+        }
+        .close-btn:hover { color: var(--primary); }
+        .modal-content .ok-btn {
+            margin-top: 16px; width: 100%; padding: 12px; border: none;
+            border-radius: 40px; background: var(--primary); color: #fff;
+            font-weight: 700; font-size: 1rem; cursor: pointer;
+        }
+
+        @media (max-width: 1400px) {
+            .app { width: 96%; }
+        }
+
+        @media (max-width: 980px) {
+            body { padding: 20px 8px; }
+            .app { width: 96%; }
+            .workspace { grid-template-columns: 1fr; }
+            .scheme-list { max-height: none; }
+        }
+    </style>
 </head>
 <body>
-
-<header class="game-header">
-  <span class="game-title">🧩 四连方游戏 · 单击旋转</span>
-</header>
-
-<div id="mirror-controls">
-  <div class="mirror-btn" id="mirrorXBtn">🪞 左右</div>
-  <div class="mirror-btn" id="cloneBtn">📋 复制</div>
-  <div class="mirror-btn" id="mirrorYBtn">🪞 上下</div>
-</div>
-
-<div class="floating-controls" id="floating-panel">
-  <div class="size-group">
-    <div class="size-item">
-      <label>📏 宽</label>
-      <div class="size-stepper">
-        <button class="step-btn" id="width-minus">−</button>
-        <input type="number" id="target-width-input" min="2" max="10" value="5" step="1" readonly>
-        <button class="step-btn" id="width-plus">+</button>
-      </div>
-      <span>格</span>
+<div class="app">
+    <div class="header">
+        <button id="helpBtn" class="help-btn">?</button>
+        <h1>拓展层作业：定制瓷板画纹样设计</h1>
     </div>
-    <div class="size-item">
-      <label>📐 高</label>
-      <div class="size-stepper">
-        <button class="step-btn" id="height-minus">−</button>
-        <input type="number" id="target-height-input" min="2" max="10" value="4" step="1" readonly>
-        <button class="step-btn" id="height-plus">+</button>
-      </div>
-      <span>格</span>
+
+    <div class="controls-bar">
+        <button id="rotateBtn" class="btn rotate" disabled>🔄 旋转</button>
+        <button id="flipBtn" class="btn flip" disabled>🪞 翻转</button>
+        <button id="deleteBtn" class="btn danger" disabled>❌ 删除</button>
+        <div class="divider"></div>
+        <button id="clearBtn" class="btn">♻️ 清空拼图</button>
+        <div class="divider"></div>
+        <button id="saveBtn" class="btn save" disabled>💾 保存方案</button>
     </div>
-  </div>
-  <button class="action-btn" id="reset-floating-btn">⟳ 重置</button>
-  <button class="check-action-btn" id="manualCheckBtn">✨ 检查填满 ✨</button>
+
+    <div class="workspace">
+        <div class="panel">
+            <div class="panel-title"><span>📦 图形库</span><span class="hint">可重复拖取</span></div>
+            <div class="library-list" id="libraryList"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">
+                <span>🧩 瓷板画设计 (5 × 4)</span>
+                <span class="hint" id="puzzleHint">填满 20 格 = 5 块</span>
+            </div>
+            <div class="puzzle-stage">
+                <div class="puzzle-grid" id="puzzleGrid"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title"><span>🗂️ 方案库</span><span class="hint" id="schemeCount">0 个</span></div>
+            <div class="scheme-list" id="schemeList"></div>
+        </div>
+    </div>
 </div>
 
-<div class="rotate-hint">💡 单击图形 = 旋转90°</div>
+<div id="toastContainer" class="toast-container"></div>
 
-<main class="main-container">
-  <div class="canvas-board" id="board"></div>
-</main>
-
-<div id="victoryModal" class="victory-modal">
-  <div class="victory-card">
-    <div class="victory-emoji">🏆✨🧩</div>
-    <div class="victory-title">挑战成功！</div>
-    <div class="victory-message">完美填满 · 无重叠</div>
-    <button class="victory-btn" id="closeVictoryBtn">继续挑战</button>
-  </div>
+<div id="helpModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" data-close>&times;</button>
+        <h2>📖 玩法说明</h2>
+        <p>1. 从 <strong>图形库</strong> 拖动四连方到中间 <strong>5×4 拼摆区</strong>，图形可重复使用。</p>
+        <p>2. 点击已放置图形可选中，使用 <strong>旋转 / 翻转 / 删除</strong>。</p>
+        <p>3. 当 <strong>无重叠地填满整个拼摆区</strong> 后，<strong>保存方案</strong> 按钮可用，把当前拼法存入右侧 <strong>方案库</strong>。</p>
+        <p>4. 方案库中的每个方案都可以 <strong>编辑</strong>（载回拼摆区修改后再保存）或 <strong>删除</strong>。</p>
+        <button class="ok-btn" data-close>开始设计</button>
+    </div>
 </div>
 
-<script src="https://metis-online.fbcontent.cn/metis-misc/zZZY40t7WJC7UdQCPACm.js"></script>
 <script>
-  // ---------- 核心变量 ----------
-  var _0xf0c7ef;let GRID=424486^424468;_0xf0c7ef=(901568^901577)+(296371^296379);var _0xc754d=(526057^526048)+(677825^677829);let currentCols=372678^372675;_0xc754d='\u0070\u006B\u006D\u0061\u006A\u006D';let currentRows=637593^637597;var _0x_0x3bc=(885611^885610)+(358482^358485);const boardEl=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0062\u006F\u0061\u0072\u0064");_0x_0x3bc=(574292^574293)+(621292^621295);let selectedGroup=null;const baseShapes=[{'\u0069\u0064':"\u0049",'\u0063\u006F\u006F\u0072\u0064\u0073':[[440216^440216,352257^352257],[137632^137633,525998^525998],[343685^343687,753106^753106],[437250^437249,264135^264135]],'\u0063\u006F\u006C\u006F\u0072':"\u0023\u0030\u0030\u0037\u0038\u0044\u0037"},{"id":"\u004F","coords":[[274083^274083,792533^792533],[884933^884932,481058^481058],[842776^842776,566668^566669],[727836^727837,598065^598064]],'\u0063\u006F\u006C\u006F\u0072':'#E81123'},{'\u0069\u0064':"\u004C","coords":[[512110^512110,347550^347550],[326879^326879,703615^703614],[757738^757739,629751^629750],[878800^878802,835577^835576]],"color":'#FFB900'},{"id":"\u0053",'\u0063\u006F\u006F\u0072\u0064\u0073':[[435737^435737,349961^349961],[107112^107113,668739^668739],[411660^411661,969708^969709],[723251^723249,415877^415876]],'\u0063\u006F\u006C\u006F\u0072':'#107C10'},{"id":"\u0054",'\u0063\u006F\u006F\u0072\u0064\u0073':[[243424^243425,372217^372217],[467801^467801,664902^664903],[609943^609942,436043^436042],[357114^357112,406758^406759]],'\u0063\u006F\u006C\u006F\u0072':"\u0023\u0046\u0037\u0036\u0033\u0030\u0043"}];function generateSufficientShapes(){var _0x7b63a=(798851^798851)+(816908^816904);const _0x9659c=currentCols*currentRows;_0x7b63a=(414572^414572)+(672327^672321);const _0x18289c=Math['\u006D\u0061\u0078'](990643^990646,Math['\u0063\u0065\u0069\u006C'](_0x9659c/(556600^556604)));const _0x94eb=[];for(let i=333743^333743;i<_0x18289c;i++){const _0x6e8eb=baseShapes[i%baseShapes['\u006C\u0065\u006E\u0067\u0074\u0068']];_0x94eb['\u0070\u0075\u0073\u0068']({'\u0069\u0064':`${_0x6e8eb['\u0069\u0064']}_${i}`,'\u0063\u006F\u006F\u0072\u0064\u0073':[..._0x6e8eb['\u0063\u006F\u006F\u0072\u0064\u0073']['\u006D\u0061\u0070'](c=>[...c])],'\u0063\u006F\u006C\u006F\u0072':_0x6e8eb['\u0063\u006F\u006C\u006F\u0072']});}return _0x94eb;}let activeShapes=generateSufficientShapes();var _0xdd8ge=(538687^538682)+(846334^846333);const victoryModal=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0076\u0069\u0063\u0074\u006F\u0072\u0079\u004D\u006F\u0064\u0061\u006C");_0xdd8ge=(517935^517930)+(939593^939593);var _0x03ec=(501417^501419)+(501226^501226);let winFlag=false;_0x03ec=(926144^926147)+(700714^700717);function showVictoryModal(){if(winFlag)return;winFlag=!![];victoryModal['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']['\u0061\u0064\u0064']("evitca".split("").reverse().join(""));}function hideVictoryModal(){victoryModal['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']['\u0072\u0065\u006D\u006F\u0076\u0065']("evitca".split("").reverse().join(""));winFlag=false;}document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0063\u006C\u006F\u0073\u0065\u0056\u0069\u0063\u0074\u006F\u0072\u0079\u0042\u0074\u006E")?.addEventListener("kcilc".split("").reverse().join(""),()=>hideVictoryModal());victoryModal?.addEventListener("kcilc".split("").reverse().join(""),e=>{if(e['\u0074\u0061\u0072\u0067\u0065\u0074']===victoryModal)hideVictoryModal();});function applyTransforms(group){if(!group)return;var _0x99f=(660849^660852)+(532351^532351);const _0xd1e6ec=parseFloat(group['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0058'])||156158^156159;_0x99f='\u0067\u006B\u0061\u0063\u0063\u0065';var _0x395gb=(256741^256748)+(904935^904931);const _0x74c=parseFloat(group['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0059'])||477849^477848;_0x395gb='\u0064\u0062\u0069\u0063\u0063\u0064';var _0x98593c=(807726^807718)+(882540^882532);const _0xac76b=parseInt(group['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0072\u006F\u0074\u0061\u0074\u0069\u006F\u006E'])||940369^940369;_0x98593c=(592433^592441)+(805335^805343);anime({"targets":group,"scaleX":_0xd1e6ec,'\u0073\u0063\u0061\u006C\u0065\u0059':_0x74c,'\u0072\u006F\u0074\u0061\u0074\u0065':_0xac76b,'\u0064\u0075\u0072\u0061\u0074\u0069\u006F\u006E':240,"easing":"\u0065\u0061\u0073\u0065\u004F\u0075\u0074\u0043\u0075\u0062\u0069\u0063","complete":()=>{forceAlignToGrid(group);checkWin();}});}function forceAlignToGrid(group){var _0x1122c=(281888^281888)+(665358^665352);const _0x65gf=boardEl['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072']("\u002E\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u007A\u006F\u006E\u0065");_0x1122c=254706^254706;if(!_0x65gf)return;const _0xd8d6e=parseFloat(_0x65gf['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']);var _0x2b019f=(728506^728505)+(398372^398372);const _0xd347f=parseFloat(_0x65gf['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']);_0x2b019f='\u0061\u0063\u0063\u0062\u0066\u0068';const _0x63fa9f=parseFloat(group['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']);var _0xfgd0b=(353230^353227)+(953436^953432);const _0x6b_0x5c3=parseFloat(group['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']);_0xfgd0b='\u0067\u006E\u0065\u0064\u0066\u006C';const _0xb0b3a=_0x63fa9f-_0xd8d6e;var _0x11d88a=(549829^549826)+(625867^625871);const _0xf34f=_0x6b_0x5c3-_0xd347f;_0x11d88a=(837788^837789)+(971786^971778);const _0x091g=Math['\u0072\u006F\u0075\u006E\u0064'](_0xb0b3a/GRID)*GRID;const _0xd86a=Math['\u0072\u006F\u0075\u006E\u0064'](_0xf34f/GRID)*GRID;if(Math['\u0061\u0062\u0073'](_0xb0b3a-_0x091g)<GRID*0.8&&Math['\u0061\u0062\u0073'](_0xf34f-_0xd86a)<GRID*0.8){group['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']=_0xd8d6e+_0x091g+"\u0070\u0078";group['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']=_0xd347f+_0xd86a+"\u0070\u0078";}}function rotateGroup(group){if(!group)return;let _0x5a_0x536=parseInt(group['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0072\u006F\u0074\u0061\u0074\u0069\u006F\u006E'])||841421^841421;group['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0072\u006F\u0074\u0061\u0074\u0069\u006F\u006E']=(_0x5a_0x536+(792252^792294))%(116587^116227);applyTransforms(group);}function toggleMirrorX(){if(!selectedGroup)return;var _0xbfd=(650542^650542)+(610714^610712);let _0x924bbf=parseFloat(selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0058'])||661326^661327;_0xbfd='\u0069\u0068\u0068\u0070\u006B\u006B';selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0058']=_0x924bbf*-(500980^500981);applyTransforms(selectedGroup);}function toggleMirrorY(){if(!selectedGroup)return;let _0xd75c=parseFloat(selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0059'])||846697^846696;selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0059']=_0xd75c*-(615485^615484);applyTransforms(selectedGroup);}var _0x3g377b=(834495^834492)+(585746^585751);let shapeCounter=161976^161976;_0x3g377b='\u0062\u0068\u0066\u006F\u0065\u0069';function cloneSelected(){if(!selectedGroup)return;var _0xbe_0xc56=(476395^476397)+(816089^816090);const _0xa166db=selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006F\u0072\u0069\u0067\u0069\u006E\u0061\u006C\u0053\u0068\u0061\u0070\u0065\u0049\u0064']||selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0073\u0068\u0061\u0070\u0065\u0049\u0064']['\u0073\u0070\u006C\u0069\u0074']("\u005F")[792233^792233];_0xbe_0xc56=(769351^769348)+(638246^638240);const _0x2b19a=baseShapes['\u0066\u0069\u006E\u0064'](s=>s['\u0069\u0064']===_0xa166db);if(!_0x2b19a)return;const _0x5106e=parseFloat(selectedGroup['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']);var _0x6g55a;const _0x25ege=parseFloat(selectedGroup['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']);_0x6g55a=(770023^770020)+(421903^421894);const _0xec911f=createPolyomino(_0x2b19a,_0x5106e+(418909^418884),_0x25ege+(742253^742260));_0xec911f['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0072\u006F\u0074\u0061\u0074\u0069\u006F\u006E']=selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0072\u006F\u0074\u0061\u0074\u0069\u006F\u006E']||"\u0030";_0xec911f['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0058']=selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0058']||"\u0031";_0xec911f['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0059']=selectedGroup['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0059']||"\u0031";applyTransforms(_0xec911f);if(selectedGroup)selectedGroup['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']['\u0072\u0065\u006D\u006F\u0076\u0065']("\u0073\u0065\u006C\u0065\u0063\u0074\u0065\u0064");selectedGroup=_0xec911f;selectedGroup['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']['\u0061\u0064\u0064']("detceles".split("").reverse().join(""));document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u006D\u0069\u0072\u0072\u006F\u0072\u002D\u0063\u006F\u006E\u0074\u0072\u006F\u006C\u0073")['\u0073\u0074\u0079\u006C\u0065']['\u0064\u0069\u0073\u0070\u006C\u0061\u0079']="\u0066\u006C\u0065\u0078";}function createPolyomino(shape,x,y){const _0xc7a3c=document['\u0063\u0072\u0065\u0061\u0074\u0065\u0045\u006C\u0065\u006D\u0065\u006E\u0074']("\u0064\u0069\u0076");_0xc7a3c['\u0063\u006C\u0061\u0073\u0073\u004E\u0061\u006D\u0065']="\u0070\u006F\u006C\u0079\u006F\u006D\u0069\u006E\u006F\u002D\u0067\u0072\u006F\u0075\u0070";_0xc7a3c['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']=x+"xp".split("").reverse().join("");_0xc7a3c['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']=y+"\u0070\u0078";var _0x2_0xf6g=(660247^660255)+(944840^944847);const _0xec9a=`${shape['\u0069\u0064']}_${shapeCounter++}`;_0x2_0xf6g=814025^814025;_0xc7a3c['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0073\u0068\u0061\u0070\u0065\u0049\u0064']=_0xec9a;_0xc7a3c['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006F\u0072\u0069\u0067\u0069\u006E\u0061\u006C\u0053\u0068\u0061\u0070\u0065\u0049\u0064']=shape['\u0069\u0064']['\u0073\u0070\u006C\u0069\u0074']("\u005F")[158904^158904];_0xc7a3c['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u0072\u006F\u0074\u0061\u0074\u0069\u006F\u006E']="\u0030";_0xc7a3c['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0058']="\u0031";_0xc7a3c['\u0064\u0061\u0074\u0061\u0073\u0065\u0074']['\u006D\u0069\u0072\u0072\u006F\u0072\u0059']="\u0031";const _0x95g22b=shape['\u0063\u006F\u006F\u0072\u0064\u0073'];var _0xef7b=(712995^713003)+(271668^271664);const _0xf544ad=Math['\u006D\u0069\u006E'](..._0x95g22b['\u006D\u0061\u0070'](c=>c[205925^205925]));_0xef7b=(486184^486189)+(784935^784929);const _0x1e586d=Math['\u006D\u0061\u0078'](..._0x95g22b['\u006D\u0061\u0070'](c=>c[906502^906502]));var _0xe55e6b=(611689^611689)+(604033^604032);const _0xd1ca=Math['\u006D\u0069\u006E'](..._0x95g22b['\u006D\u0061\u0070'](c=>c[815586^815587]));_0xe55e6b=530580^530580;var _0x1eca8e=(224276^224273)+(711782^711781);const _0x1c696b=Math['\u006D\u0061\u0078'](..._0x95g22b['\u006D\u0061\u0070'](c=>c[218209^218208]));_0x1eca8e=(206022^206018)+(586966^586965);const _0xbd_0xb80=(_0xf544ad+_0x1e586d+(659254^659255))*GRID/(964008^964010);var _0x73a1de;const _0xbdf=(_0xd1ca+_0x1c696b+(293000^293001))*GRID/(826310^826308);_0x73a1de=(437561^437567)+(365490^365489);_0xc7a3c['\u0073\u0074\u0079\u006C\u0065']['\u0074\u0072\u0061\u006E\u0073\u0066\u006F\u0072\u006D\u004F\u0072\u0069\u0067\u0069\u006E']=`${_0xbd_0xb80}px ${_0xbdf}px`;_0x95g22b['\u0066\u006F\u0072\u0045\u0061\u0063\u0068'](c=>{const _0xd3d05d=document['\u0063\u0072\u0065\u0061\u0074\u0065\u0045\u006C\u0065\u006D\u0065\u006E\u0074']("\u0064\u0069\u0076");_0xd3d05d['\u0063\u006C\u0061\u0073\u0073\u004E\u0061\u006D\u0065']="\u0062\u006C\u006F\u0063\u006B\u002D\u0075\u006E\u0069\u0074";_0xd3d05d['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']=c[303819^303819]*GRID+"\u0070\u0078";_0xd3d05d['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']=c[246626^246627]*GRID+"\u0070\u0078";_0xd3d05d['\u0073\u0074\u0079\u006C\u0065']['\u0062\u0061\u0063\u006B\u0067\u0072\u006F\u0075\u006E\u0064\u0043\u006F\u006C\u006F\u0072']=shape['\u0063\u006F\u006C\u006F\u0072'];_0xc7a3c['\u0061\u0070\u0070\u0065\u006E\u0064\u0043\u0068\u0069\u006C\u0064'](_0xd3d05d);});boardEl['\u0061\u0070\u0070\u0065\u006E\u0064\u0043\u0068\u0069\u006C\u0064'](_0xc7a3c);bindDragAndTap(_0xc7a3c);return _0xc7a3c;}function bindDragAndTap(el,_0x46be){var _0x2623bb;let _0x9dac={'\u0078':0,'\u0079':0};_0x2623bb=538321^538322;_0x46be=463875^463875;let _0xea6f2f=false;let _0x24eag={'\u0078':0,'\u0079':0};var _0xc7adg=(473996^473997)+(456761^456767);const _0x81cfe=e=>{e['\u0073\u0074\u006F\u0070\u0050\u0072\u006F\u0070\u0061\u0067\u0061\u0074\u0069\u006F\u006E']();e['\u0070\u0072\u0065\u0076\u0065\u006E\u0074\u0044\u0065\u0066\u0061\u0075\u006C\u0074']();_0x9dac['\u0078']=e['\u0063\u006C\u0069\u0065\u006E\u0074\u0058'];_0x9dac['\u0079']=e['\u0063\u006C\u0069\u0065\u006E\u0074\u0059'];_0x46be=Date['\u006E\u006F\u0077']();_0xea6f2f=false;if(selectedGroup&&selectedGroup!==el)selectedGroup['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']['\u0072\u0065\u006D\u006F\u0076\u0065']("detceles".split("").reverse().join(""));selectedGroup=el;el['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']['\u0061\u0064\u0064']("detceles".split("").reverse().join(""));document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u006D\u0069\u0072\u0072\u006F\u0072\u002D\u0063\u006F\u006E\u0074\u0072\u006F\u006C\u0073")['\u0073\u0074\u0079\u006C\u0065']['\u0064\u0069\u0073\u0070\u006C\u0061\u0079']="xelf".split("").reverse().join("");var _0x33f5f;const _0x4a9e2b=el['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();_0x33f5f='\u0062\u006A\u006F\u0067\u0069\u006B';var _0xcb4fd=(838563^838563)+(443895^443891);const boardRect=boardEl['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();_0xcb4fd=(816813^816815)+(632245^632241);_0x24eag['\u0078']=e['\u0063\u006C\u0069\u0065\u006E\u0074\u0058']-_0x4a9e2b['\u006C\u0065\u0066\u0074'];_0x24eag['\u0079']=e['\u0063\u006C\u0069\u0065\u006E\u0074\u0059']-_0x4a9e2b['\u0074\u006F\u0070'];el['\u0073\u0074\u0079\u006C\u0065']['\u007A\u0049\u006E\u0064\u0065\u0078']=790567^790595;document['\u0061\u0064\u0064\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("\u0070\u006F\u0069\u006E\u0074\u0065\u0072\u006D\u006F\u0076\u0065",_0xb0b7ca);document['\u0061\u0064\u0064\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("puretniop".split("").reverse().join(""),_0xc6ee8c);};_0xc7adg=(691008^691009)+(512165^512173);const _0xb0b7ca=e=>{const moveDist=Math['\u0068\u0079\u0070\u006F\u0074'](e['\u0063\u006C\u0069\u0065\u006E\u0074\u0058']-_0x9dac['\u0078'],e['\u0063\u006C\u0069\u0065\u006E\u0074\u0059']-_0x9dac['\u0079']);if(moveDist>(935464^935456)){_0xea6f2f=!![];const boardRect=boardEl['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();let _0xga_0xbgb=e['\u0063\u006C\u0069\u0065\u006E\u0074\u0058']-boardRect['\u006C\u0065\u0066\u0074']-_0x24eag['\u0078'];var _0x21dfde=(928044^928044)+(175692^175694);let _0x7a7ef=e['\u0063\u006C\u0069\u0065\u006E\u0074\u0059']-boardRect['\u0074\u006F\u0070']-_0x24eag['\u0079'];_0x21dfde=237723^237724;_0xga_0xbgb=Math['\u006D\u0069\u006E'](boardRect['\u0077\u0069\u0064\u0074\u0068']-(420946^420934),Math['\u006D\u0061\u0078'](-(434503^434455),_0xga_0xbgb));_0x7a7ef=Math['\u006D\u0069\u006E'](boardRect['\u0068\u0065\u0069\u0067\u0068\u0074']-(770089^770109),Math['\u006D\u0061\u0078'](-(730165^730213),_0x7a7ef));el['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']=_0xga_0xbgb+"\u0070\u0078";el['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']=_0x7a7ef+"xp".split("").reverse().join("");}};const _0xc6ee8c=e=>{document['\u0072\u0065\u006D\u006F\u0076\u0065\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("\u0070\u006F\u0069\u006E\u0074\u0065\u0072\u006D\u006F\u0076\u0065",_0xb0b7ca);document['\u0072\u0065\u006D\u006F\u0076\u0065\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("\u0070\u006F\u0069\u006E\u0074\u0065\u0072\u0075\u0070",_0xc6ee8c);el['\u0073\u0074\u0079\u006C\u0065']['\u007A\u0049\u006E\u0064\u0065\u0078']=631464^631484;const _0x36b1ef=Date['\u006E\u006F\u0077']()-_0x46be;const moveDist=Math['\u0068\u0079\u0070\u006F\u0074'](e['\u0063\u006C\u0069\u0065\u006E\u0074\u0058']-_0x9dac['\u0078'],e['\u0063\u006C\u0069\u0065\u006E\u0074\u0059']-_0x9dac['\u0079']);if(!_0xea6f2f&&moveDist<=(524114^524122)&&_0x36b1ef<(487220^486936)){rotateGroup(el);}else if(_0xea6f2f||moveDist>(147140^147148)){snapToTargetZone(el,!![]);}checkWin();};el['\u0061\u0064\u0064\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("\u0070\u006F\u0069\u006E\u0074\u0065\u0072\u0064\u006F\u0077\u006E",_0x81cfe);}function snapToTargetZone(el,forceAlign=false){var _0x3_0x5g6;const _0xdc65b=boardEl['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072']("enoz-tegrat.".split("").reverse().join(""));_0x3_0x5g6=(419451^419449)+(136071^136065);if(!_0xdc65b)return;const _0xca0c=parseFloat(_0xdc65b['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']);var _0xf337e=(555139^555143)+(916615^916623);const _0x10a9a=parseFloat(_0xdc65b['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']);_0xf337e=(118393^118392)+(232126^232120);var _0x3576f;const _0x98adfc=el['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();_0x3576f='\u0064\u006F\u006C\u006A\u0068\u0062';const _0x422ce=boardEl['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();var _0xd9936e;const _0x56e3eb=_0x98adfc['\u006C\u0065\u0066\u0074']-_0x422ce['\u006C\u0065\u0066\u0074'];_0xd9936e=829748^829757;const _0xf3g=_0x98adfc['\u0074\u006F\u0070']-_0x422ce['\u0074\u006F\u0070'];const _0x1aec=_0x56e3eb-_0xca0c;const _0x477ge=_0xf3g-_0x10a9a;const _0x72be7a=Math['\u0072\u006F\u0075\u006E\u0064'](_0x1aec/GRID)*GRID;const _0x449fc=Math['\u0072\u006F\u0075\u006E\u0064'](_0x477ge/GRID)*GRID;var _0xa596f;const _0xdedcd=_0xca0c+_0x72be7a-_0x56e3eb;_0xa596f=(790119^790113)+(629194^629186);var _0x4_0xg21=(578999^578995)+(640898^640902);const _0xdbc=_0x10a9a+_0x449fc-_0xf3g;_0x4_0xg21="glcgmq".split("").reverse().join("");if(forceAlign||Math['\u0061\u0062\u0073'](_0xdedcd)<GRID*0.7&&Math['\u0061\u0062\u0073'](_0xdbc)<GRID*0.7){var _0x48cc2b=(808473^808465)+(994339^994340);const _0x819d=parseFloat(el['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074'])+_0xdedcd;_0x48cc2b='\u006A\u0066\u006C\u006D\u006D\u0069';const _0x04ef1e=parseFloat(el['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070'])+_0xdbc;el['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']=_0x819d+"xp".split("").reverse().join("");el['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']=_0x04ef1e+"xp".split("").reverse().join("");}}function evaluateWin(showAlert=false){var _0x4fda=(746342^746342)+(632806^632801);const _0x8ca5d=boardEl['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072']("\u002E\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u007A\u006F\u006E\u0065");_0x4fda="ajajbl".split("").reverse().join("");if(!_0x8ca5d)return false;var _0x1a5e=(460100^460108)+(690110^690102);const _0x3412ed=_0x8ca5d['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();_0x1a5e=(682394^682399)+(223562^223567);var _0xa3252d;const _0x6568ce=boardEl['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();_0xa3252d="goiciq".split("").reverse().join("");var _0xb753cb=(586792^586794)+(219614^219606);const _0xc_0xb39=_0x3412ed['\u006C\u0065\u0066\u0074']-_0x6568ce['\u006C\u0065\u0066\u0074'];_0xb753cb=(910470^910479)+(292099^292097);var _0x416cb=(104290^104299)+(398237^398233);const _0x076a9g=_0x3412ed['\u0074\u006F\u0070']-_0x6568ce['\u0074\u006F\u0070'];_0x416cb=(728727^728722)+(584013^584004);const _0x727f=boardEl['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072\u0041\u006C\u006C']("\u002E\u0070\u006F\u006C\u0079\u006F\u006D\u0069\u006E\u006F\u002D\u0067\u0072\u006F\u0075\u0070");var _0x43b=(665951^665951)+(960789^960797);const _0x54df=[];_0x43b='\u0065\u0061\u006F\u0068\u0064\u0065';_0x727f['\u0066\u006F\u0072\u0045\u0061\u0063\u0068'](group=>{const _0x0d13be=group['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072\u0041\u006C\u006C']("\u002E\u0062\u006C\u006F\u0063\u006B\u002D\u0075\u006E\u0069\u0074");_0x0d13be['\u0066\u006F\u0072\u0045\u0061\u0063\u0068'](block=>{const _0x8ea60e=block['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();_0x54df['\u0070\u0075\u0073\u0068']({"left":_0x8ea60e['\u006C\u0065\u0066\u0074']-_0x6568ce['\u006C\u0065\u0066\u0074'],'\u0074\u006F\u0070':_0x8ea60e['\u0074\u006F\u0070']-_0x6568ce['\u0074\u006F\u0070'],'\u0072\u0069\u0067\u0068\u0074':_0x8ea60e['\u0072\u0069\u0067\u0068\u0074']-_0x6568ce['\u006C\u0065\u0066\u0074'],'\u0062\u006F\u0074\u0074\u006F\u006D':_0x8ea60e['\u0062\u006F\u0074\u0074\u006F\u006D']-_0x6568ce['\u0074\u006F\u0070']});});});var _0x8652db=(380198^380196)+(393194^393187);const _0x235f=GRID;_0x8652db=(800362^800355)+(937427^937434);const _0x7ae=GRID;var _0x5_0xbc2;const _0xef5d2c=_0x235f*_0x7ae;_0x5_0xbc2='\u0071\u0067\u006E\u006F\u0069\u0070';const _0x7da08e=Array(currentRows)['\u0066\u0069\u006C\u006C']()['\u006D\u0061\u0070'](()=>Array(currentCols)['\u0066\u0069\u006C\u006C'](427509^427509));for(let row=462968^462968;row<currentRows;row++){for(let col=932027^932027;col<currentCols;col++){var _0xbd02ec=(362527^362518)+(843445^843443);const _0x243c=_0xc_0xb39+col*_0x235f;_0xbd02ec="ogflpn".split("").reverse().join("");var _0xaecf6b;const _0x1986d=_0x076a9g+row*_0x7ae;_0xaecf6b=(817936^817939)+(605886^605878);var _0xa891ad=(355495^355493)+(583174^583173);const _0x1c5d1b=_0x243c+_0x235f;_0xa891ad=493109^493109;const _0xb94d=_0x1986d+_0x7ae;var _0xd61bec=(822065^822070)+(793249^793253);let _0x03ede=595814^595814;_0xd61bec=530213^530221;for(const _0xb_0x8a0 of _0x54df){var _0xdd682d;const _0xa1a3e=Math['\u006D\u0061\u0078'](_0xb_0x8a0['\u006C\u0065\u0066\u0074'],_0x243c);_0xdd682d=(844410^844403)+(678131^678132);const _0x7_0xc2a=Math['\u006D\u0069\u006E'](_0xb_0x8a0['\u0072\u0069\u0067\u0068\u0074'],_0x1c5d1b);var _0xf3473a;const _0x8c_0xafc=Math['\u006D\u0061\u0078'](_0xb_0x8a0['\u0074\u006F\u0070'],_0x1986d);_0xf3473a=486213^486213;const _0x9ebdc=Math['\u006D\u0069\u006E'](_0xb_0x8a0['\u0062\u006F\u0074\u0074\u006F\u006D'],_0xb94d);if(_0xa1a3e<_0x7_0xc2a&&_0x8c_0xafc<_0x9ebdc){_0x03ede+=(_0x7_0xc2a-_0xa1a3e)*(_0x9ebdc-_0x8c_0xafc);}}_0x7da08e[row][col]=_0x03ede;}}var _0xd234cf=(144641^144641)+(353110^353106);let _0x7b4a=!![];_0xd234cf=(208931^208938)+(725034^725026);var _0x282e;let _0x9a85dc=false;_0x282e=939121^939121;let _0x8eb=[];let _0x7a_0xbbd=[];for(let row=573355^573355;row<currentRows;row++){for(let col=607021^607021;col<currentCols;col++){var _0x1ce;const _0x7a9fg=_0x7da08e[row][col];_0x1ce=(600600^600601)+(762470^762464);if(_0x7a9fg<_0xef5d2c*0.95){_0x7b4a=false;_0x8eb['\u0070\u0075\u0073\u0068'](`(${col+(584653^584652)},${row+(456468^456469)})`);}if(_0x7a9fg>_0xef5d2c*1.15){_0x9a85dc=!![];_0x7a_0xbbd['\u0070\u0075\u0073\u0068'](`(${col+(440034^440035)},${row+(260593^260592)})`);}}}const _0x784aa=_0x7b4a&&!_0x9a85dc;if(showAlert){if(_0x784aa){alert(`🎉 完美！已填满 ${currentCols*currentRows} 个格子且无明显重叠！ 🎉`);showVictoryModal();}else{let _0xbaf6f=`❌ 未完成 ❌\n目标: ${currentCols} x ${currentRows} = ${currentCols*currentRows} 格\n`;if(_0x9a85dc){_0xbaf6f+=`⚠️ 严重重叠: ${_0x7a_0xbbd['\u006A\u006F\u0069\u006E']("\u002C\u0020")}\n`;}else if(!_0x7b4a){_0xbaf6f+=`🔍 缺失或未填满: ${_0x8eb['\u006C\u0065\u006E\u0067\u0074\u0068']} 处空缺\n`;_0xbaf6f+=`💡 提示: 确保方块完全覆盖每个格子。`;}else{_0xbaf6f+=`📌 接近完成但仍有细微偏差，请对齐方块。`;}alert(_0xbaf6f);}}return _0x784aa;}function checkWin(){if(evaluateWin(false)){showVictoryModal();}}function rebuildFullLayout(){const _0x92db=boardEl['\u0067\u0065\u0074\u0042\u006F\u0075\u006E\u0064\u0069\u006E\u0067\u0043\u006C\u0069\u0065\u006E\u0074\u0052\u0065\u0063\u0074']();let _0x16a19c=_0x92db['\u0077\u0069\u0064\u0074\u0068'],_0x575d=_0x92db['\u0068\u0065\u0069\u0067\u0068\u0074'];if(_0x16a19c<(323219^323319))_0x16a19c=boardEl['\u0063\u006C\u0069\u0065\u006E\u0074\u0057\u0069\u0064\u0074\u0068'];if(_0x575d<(256502^256402))_0x575d=boardEl['\u0063\u006C\u0069\u0065\u006E\u0074\u0048\u0065\u0069\u0067\u0068\u0074'];var _0xa17b9b=(191837^191833)+(820883^820881);const _0xea8dg=_0x16a19c/(currentCols+2.2);_0xa17b9b=(214044^214042)+(186370^186373);var _0x48eb5f=(659988^659996)+(843805^843805);const _0xce374g=_0x575d/(currentRows+2.5);_0x48eb5f=867086^867086;let _0x3g_0x2fb=Math['\u006D\u0069\u006E'](_0xea8dg,_0xce374g,452021^451981);if(_0x3g_0x2fb<(646704^646696))_0x3g_0x2fb=779989^779981;GRID=_0x3g_0x2fb;document['\u0064\u006F\u0063\u0075\u006D\u0065\u006E\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074']['\u0073\u0074\u0079\u006C\u0065']['\u0073\u0065\u0074\u0050\u0072\u006F\u0070\u0065\u0072\u0074\u0079']("\u002D\u002D\u0067\u0072\u0069\u0064\u002D\u0073\u0069\u007A\u0065",GRID+"xp".split("").reverse().join(""));boardEl['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072\u0041\u006C\u006C']("puorg-onimoylop.".split("").reverse().join(""))['\u0066\u006F\u0072\u0045\u0061\u0063\u0068'](g=>g['\u0072\u0065\u006D\u006F\u0076\u0065']());var _0x0b_0xbff=(412960^412963)+(435686^435683);const _0xa_0xdc7=boardEl['\u0071\u0075\u0065\u0072\u0079\u0053\u0065\u006C\u0065\u0063\u0074\u006F\u0072']("\u002E\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u007A\u006F\u006E\u0065");_0x0b_0xbff=(850719^850710)+(728385^728387);if(_0xa_0xdc7)_0xa_0xdc7['\u0072\u0065\u006D\u006F\u0076\u0065']();const _0xfda1ga=currentCols*GRID;const _0x228da=currentRows*GRID;var _0xa8982f=(937294^937293)+(168478^168479);const _0xbcc74g=(_0x16a19c-_0xfda1ga)/(484525^484527);_0xa8982f=507887^507887;const _0x36c=(_0x575d-_0x228da)/(798551^798549);const _0x88351b=document['\u0063\u0072\u0065\u0061\u0074\u0065\u0045\u006C\u0065\u006D\u0065\u006E\u0074']("\u0064\u0069\u0076");_0x88351b['\u0063\u006C\u0061\u0073\u0073\u004E\u0061\u006D\u0065']="\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u007A\u006F\u006E\u0065";_0x88351b['\u0073\u0074\u0079\u006C\u0065']['\u0077\u0069\u0064\u0074\u0068']=_0xfda1ga+"\u0070\u0078";_0x88351b['\u0073\u0074\u0079\u006C\u0065']['\u0068\u0065\u0069\u0067\u0068\u0074']=_0x228da+"\u0070\u0078";_0x88351b['\u0073\u0074\u0079\u006C\u0065']['\u006C\u0065\u0066\u0074']=_0xbcc74g+"\u0070\u0078";_0x88351b['\u0073\u0074\u0079\u006C\u0065']['\u0074\u006F\u0070']=_0x36c+"\u0070\u0078";boardEl['\u0061\u0070\u0070\u0065\u006E\u0064\u0043\u0068\u0069\u006C\u0064'](_0x88351b);activeShapes=generateSufficientShapes();shapeCounter=816398^816398;var _0x24egab=(423062^423071)+(696922^696924);const _0xefa=Math['\u006D\u0061\u0078'](GRID*0.6,_0x36c-2.5*GRID);_0x24egab='\u006A\u0070\u0065\u0069\u0068\u0069';var _0x89e7b=(260512^260521)+(145094^145088);const _0x6687eb=GRID*0.8;_0x89e7b=(177597^177598)+(575252^575254);const _0x2466f=_0x16a19c-(762865^762795);var _0x882f;const _0x72g7d=Math['\u006D\u0061\u0078'](714347^714403,_0x2466f-_0x6687eb);_0x882f=(279053^279051)+(762219^762218);const _0xf01e=_0x72g7d/(activeShapes['\u006C\u0065\u006E\u0067\u0074\u0068']+(389371^389370));for(let i=155823^155823;i<activeShapes['\u006C\u0065\u006E\u0067\u0074\u0068'];i++){var _0x5a93dd=(796512^796518)+(775869^775866);let x=_0x6687eb+_0xf01e*(i+(558638^558639));_0x5a93dd=(308198^308199)+(785318^785317);x=Math['\u006D\u0069\u006E'](_0x2466f-GRID*1.5,Math['\u006D\u0061\u0078'](_0x6687eb,x));createPolyomino(activeShapes[i],x,_0xefa);}selectedGroup=null;const _0x5df8ac=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u006D\u0069\u0072\u0072\u006F\u0072\u002D\u0063\u006F\u006E\u0074\u0072\u006F\u006C\u0073");if(_0x5df8ac)_0x5df8ac['\u0073\u0074\u0079\u006C\u0065']['\u0064\u0069\u0073\u0070\u006C\u0061\u0079']="enon".split("").reverse().join("");hideVictoryModal();}function updateTargetSize(){var _0xb513a=(235090^235098)+(450091^450094);let _0x27a=parseInt(document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0077\u0069\u0064\u0074\u0068\u002D\u0069\u006E\u0070\u0075\u0074")['\u0076\u0061\u006C\u0075\u0065'],624551^624557);_0xb513a=(125929^125920)+(684955^684957);let _0x8_0xfdc=parseInt(document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0068\u0065\u0069\u0067\u0068\u0074\u002D\u0069\u006E\u0070\u0075\u0074")['\u0076\u0061\u006C\u0075\u0065'],787429^787439);if(isNaN(_0x27a))_0x27a=175738^175743;if(isNaN(_0x8_0xfdc))_0x8_0xfdc=346466^346470;_0x27a=Math['\u006D\u0069\u006E'](343574^343580,Math['\u006D\u0061\u0078'](111254^111252,_0x27a));_0x8_0xfdc=Math['\u006D\u0069\u006E'](784682^784672,Math['\u006D\u0061\u0078'](274206^274204,_0x8_0xfdc));if(_0x27a===currentCols&&_0x8_0xfdc===currentRows)return;currentCols=_0x27a;currentRows=_0x8_0xfdc;document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0077\u0069\u0064\u0074\u0068\u002D\u0069\u006E\u0070\u0075\u0074")['\u0076\u0061\u006C\u0075\u0065']=currentCols;document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0068\u0065\u0069\u0067\u0068\u0074\u002D\u0069\u006E\u0070\u0075\u0074")['\u0076\u0061\u006C\u0075\u0065']=currentRows;rebuildFullLayout();}function resetGame(){let _0x4a6ecc=parseInt(document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0077\u0069\u0064\u0074\u0068\u002D\u0069\u006E\u0070\u0075\u0074")['\u0076\u0061\u006C\u0075\u0065'],994016^994026);let _0x2cef2f=parseInt(document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("tupni-thgieh-tegrat".split("").reverse().join(""))['\u0076\u0061\u006C\u0075\u0065'],579187^579193);if(isNaN(_0x4a6ecc))_0x4a6ecc=503857^503860;if(isNaN(_0x2cef2f))_0x2cef2f=228319^228315;currentCols=Math['\u006D\u0069\u006E'](214812^214806,Math['\u006D\u0061\u0078'](314613^314615,_0x4a6ecc));currentRows=Math['\u006D\u0069\u006E'](345852^345846,Math['\u006D\u0061\u0078'](161701^161703,_0x2cef2f));document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0077\u0069\u0064\u0074\u0068\u002D\u0069\u006E\u0070\u0075\u0074")['\u0076\u0061\u006C\u0075\u0065']=currentCols;document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("tupni-thgieh-tegrat".split("").reverse().join(""))['\u0076\u0061\u006C\u0075\u0065']=currentRows;rebuildFullLayout();}let resizeTimer;function onWindowResize(){if(resizeTimer)clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(boardEl)rebuildFullLayout();},307098^306956);}function initStepperControls(){var _0xe726c;const _0x6445cd=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0077\u0069\u0064\u0074\u0068\u002D\u0069\u006E\u0070\u0075\u0074");_0xe726c=(660806^660815)+(882782^882779);var _0xfc6eb;const _0x7e91f=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u0068\u0065\u0069\u0067\u0068\u0074\u002D\u0069\u006E\u0070\u0075\u0074");_0xfc6eb=(637582^637575)+(446852^446849);const _0x1c559f=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0077\u0069\u0064\u0074\u0068\u002D\u0070\u006C\u0075\u0073");var _0x3422a=(638406^638414)+(232881^232889);const _0xe76e=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0077\u0069\u0064\u0074\u0068\u002D\u006D\u0069\u006E\u0075\u0073");_0x3422a=(453475^453477)+(218062^218060);var _0xd097d=(921470^921462)+(331693^331690);const _0xd27d=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("sulp-thgieh".split("").reverse().join(""));_0xd097d=970373^970370;var _0xe_0x188;const _0xfe_0xf73=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0068\u0065\u0069\u0067\u0068\u0074\u002D\u006D\u0069\u006E\u0075\u0073");_0xe_0x188='\u0070\u0070\u006F\u0066\u006D\u0061';const _0xf9c28b=delta=>{let val=parseInt(_0x6445cd['\u0076\u0061\u006C\u0075\u0065'],501928^501922);if(isNaN(val))val=currentCols;val=Math['\u006D\u0069\u006E'](290283^290273,Math['\u006D\u0061\u0078'](880661^880663,val+delta));if(val!==currentCols){_0x6445cd['\u0076\u0061\u006C\u0075\u0065']=val;updateTargetSize();}};const _0x7b748a=delta=>{let val=parseInt(_0x7e91f['\u0076\u0061\u006C\u0075\u0065'],788123^788113);if(isNaN(val))val=currentRows;val=Math['\u006D\u0069\u006E'](176862^176852,Math['\u006D\u0061\u0078'](251166^251164,val+delta));if(val!==currentRows){_0x7e91f['\u0076\u0061\u006C\u0075\u0065']=val;updateTargetSize();}};_0x1c559f?.addEventListener("kcilc".split("").reverse().join(""),()=>_0xf9c28b(830186^830187));_0xe76e?.addEventListener("kcilc".split("").reverse().join(""),()=>_0xf9c28b(-(623362^623363)));_0xd27d?.addEventListener("\u0063\u006C\u0069\u0063\u006B",()=>_0x7b748a(942074^942075));_0xfe_0xf73?.addEventListener("\u0063\u006C\u0069\u0063\u006B",()=>_0x7b748a(-(578310^578311)));}function bindAllControls(){document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("ntBXrorrim".split("").reverse().join(""))?.addEventListener("\u0063\u006C\u0069\u0063\u006B",e=>{e['\u0073\u0074\u006F\u0070\u0050\u0072\u006F\u0070\u0061\u0067\u0061\u0074\u0069\u006F\u006E']();toggleMirrorX();});document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("ntBYrorrim".split("").reverse().join(""))?.addEventListener("\u0063\u006C\u0069\u0063\u006B",e=>{e['\u0073\u0074\u006F\u0070\u0050\u0072\u006F\u0070\u0061\u0067\u0061\u0074\u0069\u006F\u006E']();toggleMirrorY();});document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("ntBenolc".split("").reverse().join(""))?.addEventListener("\u0063\u006C\u0069\u0063\u006B",e=>{e['\u0073\u0074\u006F\u0070\u0050\u0072\u006F\u0070\u0061\u0067\u0061\u0074\u0069\u006F\u006E']();cloneSelected();});document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u0072\u0065\u0073\u0065\u0074\u002D\u0066\u006C\u006F\u0061\u0074\u0069\u006E\u0067\u002D\u0062\u0074\u006E")?.addEventListener("\u0063\u006C\u0069\u0063\u006B",e=>{e['\u0073\u0074\u006F\u0070\u0050\u0072\u006F\u0070\u0061\u0067\u0061\u0074\u0069\u006F\u006E']();resetGame();});document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("\u006D\u0061\u006E\u0075\u0061\u006C\u0043\u0068\u0065\u0063\u006B\u0042\u0074\u006E")?.addEventListener("kcilc".split("").reverse().join(""),()=>{evaluateWin(!![]);});initStepperControls();}function bindDeselectBackground(){boardEl['\u0061\u0064\u0064\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("nwodretniop".split("").reverse().join(""),e=>{if(e['\u0074\u0061\u0072\u0067\u0065\u0074']===boardEl||e['\u0074\u0061\u0072\u0067\u0065\u0074']['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']?.contains("\u0074\u0061\u0072\u0067\u0065\u0074\u002D\u007A\u006F\u006E\u0065")){if(selectedGroup){selectedGroup['\u0063\u006C\u0061\u0073\u0073\u004C\u0069\u0073\u0074']['\u0072\u0065\u006D\u006F\u0076\u0065']("detceles".split("").reverse().join(""));selectedGroup=null;var _0x8cb;const _0xab2f9g=document['\u0067\u0065\u0074\u0045\u006C\u0065\u006D\u0065\u006E\u0074\u0042\u0079\u0049\u0064']("slortnoc-rorrim".split("").reverse().join(""));_0x8cb="ccqhjf".split("").reverse().join("");if(_0xab2f9g)_0xab2f9g['\u0073\u0074\u0079\u006C\u0065']['\u0064\u0069\u0073\u0070\u006C\u0061\u0079']="enon".split("").reverse().join("");}}});}function init(){bindAllControls();bindDeselectBackground();resetGame();window['\u0061\u0064\u0064\u0045\u0076\u0065\u006E\u0074\u004C\u0069\u0073\u0074\u0065\u006E\u0065\u0072']("\u0072\u0065\u0073\u0069\u007A\u0065",onWindowResize);}window['\u006F\u006E\u006C\u006F\u0061\u0064']=init;
+(function () {
+    const COLS = 5, ROWS = 4;
+
+    const SHAPE_DEFS = [
+        { name: 'I', color: '#2c7da0', blocks: [[0,0],[0,1],[0,2],[0,3]] },
+        { name: 'O', color: '#f59e0b', blocks: [[0,0],[0,1],[1,0],[1,1]] },
+        { name: 'T', color: '#2E7D32', blocks: [[0,0],[0,1],[0,2],[1,1]] },
+        { name: 'L', color: '#8E24AA', blocks: [[0,0],[1,0],[2,0],[2,1]] },
+        { name: 'S', color: '#c0473b', blocks: [[0,1],[0,2],[1,0],[1,1]] }
+    ].map(s => ({ ...s, blocks: s.blocks.map(([r, c]) => ({ r, c })) }));
+
+    let pieces = [];
+    let selectedId = null;
+    let pieceSeq = 0;
+    let drag = null;
+    let schemes = [];
+    let schemeSeq = 0;
+    let editingSchemeId = null;
+
+    const puzzleGrid = document.getElementById('puzzleGrid');
+    const libraryList = document.getElementById('libraryList');
+    const schemeList = document.getElementById('schemeList');
+    const schemeCount = document.getElementById('schemeCount');
+    const puzzleHint = document.getElementById('puzzleHint');
+    const rotateBtn = document.getElementById('rotateBtn');
+    const flipBtn = document.getElementById('flipBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const helpBtn = document.getElementById('helpBtn');
+    const toastContainer = document.getElementById('toastContainer');
+    const helpModal = document.getElementById('helpModal');
+
+    /* ---------- 工具 ---------- */
+    function toast(msg, type = '') {
+        toastContainer.innerHTML = '';
+        const el = document.createElement('div');
+        el.className = 'toast ' + type;
+        el.textContent = msg;
+        toastContainer.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2000);
+    }
+
+    function normalize(blocks) {
+        const minR = Math.min(...blocks.map(b => b.r));
+        const minC = Math.min(...blocks.map(b => b.c));
+        return blocks.map(b => ({ r: b.r - minR, c: b.c - minC }));
+    }
+
+    function occupiedSet(excludeId) {
+        const set = new Set();
+        for (const p of pieces) {
+            if (p.id === excludeId) continue;
+            for (const c of p.cells) set.add(c.r + ',' + c.c);
+        }
+        return set;
+    }
+
+    // 仅判断是否在网格范围内（允许重叠）
+    function inBounds(cells) {
+        return cells.every(c => c.r >= 0 && c.r < ROWS && c.c >= 0 && c.c < COLS);
+    }
+
+    // 整体评估：是否有重叠 / 是否无重叠地填满
+    function evaluate() {
+        const count = {};
+        for (const p of pieces) {
+            for (const c of p.cells) {
+                if (c.r < 0 || c.r >= ROWS || c.c < 0 || c.c >= COLS) continue;
+                const k = c.r + ',' + c.c;
+                count[k] = (count[k] || 0) + 1;
+            }
+        }
+        const overlap = Object.values(count).some(v => v > 1);
+        const filled = Object.keys(count).length;
+        return { overlap, full: filled === COLS * ROWS && !overlap };
+    }
+
+    /* ---------- 拼摆区 ---------- */
+    function buildGrid() {
+        puzzleGrid.innerHTML = '';
+        puzzleGrid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+        puzzleGrid.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
+        puzzleGrid.style.aspectRatio = `${COLS} / ${ROWS}`;
+        const MAX_H = 380;
+        puzzleGrid.style.width = `min(100%, ${Math.round(MAX_H * COLS / ROWS)}px)`;
+        puzzleGrid.style.height = 'auto';
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'pcell';
+                cell.dataset.r = r;
+                cell.dataset.c = c;
+                puzzleGrid.appendChild(cell);
+            }
+        }
+        paintPieces();
+    }
+
+    function cellAt(r, c) {
+        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return null;
+        return puzzleGrid.children[r * COLS + c];
+    }
+
+    function paintPieces() {
+        for (const cell of puzzleGrid.children) {
+            cell.className = 'pcell';
+            cell.style.background = '';
+            cell.style.boxShadow = '';
+        }
+        for (const p of pieces) {
+            for (const c of p.cells) {
+                const cell = cellAt(c.r, c.c);
+                if (!cell) continue;
+                cell.classList.add('filled');
+                cell.style.background = p.color;
+            }
+        }
+        const sel = pieces.find(p => p.id === selectedId);
+        if (sel) {
+            const set = new Set(sel.cells.map(c => c.r + ',' + c.c));
+            const C = '#00c8ff', W = 3;
+            for (const c of sel.cells) {
+                const cell = cellAt(c.r, c.c);
+                if (!cell) continue;
+                const shadows = [];
+                if (!set.has((c.r - 1) + ',' + c.c)) shadows.push(`inset 0 ${W}px 0 0 ${C}`);
+                if (!set.has((c.r + 1) + ',' + c.c)) shadows.push(`inset 0 -${W}px 0 0 ${C}`);
+                if (!set.has(c.r + ',' + (c.c - 1))) shadows.push(`inset ${W}px 0 0 0 ${C}`);
+                if (!set.has(c.r + ',' + (c.c + 1))) shadows.push(`inset -${W}px 0 0 0 ${C}`);
+                if (shadows.length) cell.style.boxShadow = shadows.join(', ');
+            }
+        }
+    }
+
+    /* ---------- 图形库 ---------- */
+    function buildLibrary() {
+        libraryList.innerHTML = '';
+        SHAPE_DEFS.forEach((shape, idx) => {
+            const item = document.createElement('div');
+            item.className = 'lib-item';
+            const blocks = normalize(shape.blocks);
+            const maxR = Math.max(...blocks.map(b => b.r));
+            const maxC = Math.max(...blocks.map(b => b.c));
+            const r = maxR + 1, cc = maxC + 1;
+
+            const mini = document.createElement('div');
+            mini.className = 'lib-mini';
+            mini.style.gridTemplateColumns = `repeat(${cc}, 24px)`;
+            mini.style.gridTemplateRows = `repeat(${r}, 24px)`;
+            const filled = new Set(blocks.map(b => b.r + ',' + b.c));
+            for (let rr = 0; rr < r; rr++) {
+                for (let ccol = 0; ccol < cc; ccol++) {
+                    const mc = document.createElement('div');
+                    mc.className = 'lib-cell';
+                    if (filled.has(rr + ',' + ccol)) {
+                        mc.classList.add('filled');
+                        mc.style.background = shape.color;
+                    }
+                    mini.appendChild(mc);
+                }
+            }
+            item.appendChild(mini);
+            item.addEventListener('pointerdown', e => startDragFromLibrary(e, idx));
+            libraryList.appendChild(item);
+        });
+    }
+
+    /* ---------- 拖拽 ---------- */
+    let ghostEl = null;
+
+    function currentCellSize() {
+        return puzzleGrid.getBoundingClientRect().width / COLS;
+    }
+
+    function makeGhost(blocks, color) {
+        removeGhost();
+        const maxR = Math.max(...blocks.map(b => b.r));
+        const maxC = Math.max(...blocks.map(b => b.c));
+        const size = currentCellSize();
+        const g = document.createElement('div');
+        g.className = 'ghost';
+        g.style.gridTemplateColumns = `repeat(${maxC + 1}, ${size}px)`;
+        g.style.gridTemplateRows = `repeat(${maxR + 1}, ${size}px)`;
+        const filled = new Set(blocks.map(b => b.r + ',' + b.c));
+        for (let r = 0; r <= maxR; r++) {
+            for (let c = 0; c <= maxC; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'ghost-cell';
+                if (filled.has(r + ',' + c)) {
+                    cell.classList.add('filled');
+                    cell.style.background = color;
+                }
+                g.appendChild(cell);
+            }
+        }
+        document.body.appendChild(g);
+        ghostEl = g;
+    }
+
+    function removeGhost() { if (ghostEl) { ghostEl.remove(); ghostEl = null; } }
+
+    function moveGhost(clientX, clientY) {
+        if (!ghostEl || !drag) return;
+        const size = currentCellSize();
+        const left = clientX - (drag.grab.c + 0.5) * size;
+        const top = clientY - (drag.grab.r + 0.5) * size;
+        ghostEl.style.transform = `translate(${left}px, ${top}px)`;
+    }
+
+    function startDragFromLibrary(e, idx) {
+        e.preventDefault();
+        const shape = SHAPE_DEFS[idx];
+        const blocks = normalize(shape.blocks);
+        drag = { blocks, color: shape.color, grab: blocks[0], original: null };
+        makeGhost(blocks, shape.color);
+        moveGhost(e.clientX, e.clientY);
+    }
+
+    function startDragFromGrid(e, piece, clickedR, clickedC) {
+        e.preventDefault();
+        const blocks = normalize(piece.cells);
+        const minR = Math.min(...piece.cells.map(c => c.r));
+        const minC = Math.min(...piece.cells.map(c => c.c));
+        const grab = { r: clickedR - minR, c: clickedC - minC };
+        pieces = pieces.filter(p => p.id !== piece.id);
+        drag = { blocks, color: piece.color, grab, original: piece };
+        paintPieces();
+        makeGhost(blocks, piece.color);
+        moveGhost(e.clientX, e.clientY);
+    }
+
+    function hoveredCell(clientX, clientY) {
+        const rect = puzzleGrid.getBoundingClientRect();
+        const size = currentCellSize();
+        const c = Math.floor((clientX - rect.left) / size);
+        const r = Math.floor((clientY - rect.top) / size);
+        return { r, c, inside: clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom };
+    }
+
+    function clearPreview() {
+        for (const cell of puzzleGrid.children) cell.classList.remove('preview-ok', 'preview-bad');
+    }
+
+    function updatePreview(clientX, clientY) {
+        clearPreview();
+        if (!drag) return;
+        const h = hoveredCell(clientX, clientY);
+        if (!h.inside) return;
+        const originR = h.r - drag.grab.r, originC = h.c - drag.grab.c;
+        const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
+        const ok = inBounds(cells);
+        cells.forEach(c => {
+            const cell = cellAt(c.r, c.c);
+            if (cell) cell.classList.add(ok ? 'preview-ok' : 'preview-bad');
+        });
+    }
+
+    function onPointerMove(e) {
+        if (!drag) return;
+        e.preventDefault();
+        moveGhost(e.clientX, e.clientY);
+        updatePreview(e.clientX, e.clientY);
+    }
+
+    function onPointerUp(e) {
+        if (!drag) return;
+        const h = hoveredCell(e.clientX, e.clientY);
+        let placed = false;
+        if (h.inside) {
+            const originR = h.r - drag.grab.r, originC = h.c - drag.grab.c;
+            const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
+            if (inBounds(cells)) {
+                const id = ++pieceSeq;
+                pieces.push({ id, color: drag.color, cells });
+                selectedId = id;
+                placed = true;
+            }
+        }
+        if (!placed && drag.original) {
+            pieces.push(drag.original);
+            selectedId = drag.original.id;
+        } else if (!placed && !drag.original && h.inside) {
+            toast('这里放不下哦', 'error');
+        }
+        drag = null;
+        removeGhost();
+        clearPreview();
+        paintPieces();
+        updateToolbar();
+        if (placed) checkFull();
+    }
+
+    function onGridPointerDown(e) {
+        const target = e.target.closest('.pcell');
+        if (!target) return;
+        const r = +target.dataset.r, c = +target.dataset.c;
+        const piece = pieces.find(p => p.cells.some(cc => cc.r === r && cc.c === c));
+        if (piece) {
+            selectedId = piece.id;
+            paintPieces();
+            updateToolbar();
+            startDragFromGrid(e, piece, r, c);
+        } else {
+            selectedId = null;
+            paintPieces();
+            updateToolbar();
+        }
+    }
+
+    /* ---------- 旋转 / 翻转 / 删除 ---------- */
+    function selectedPiece() { return pieces.find(p => p.id === selectedId); }
+
+    function transformSelected(fn, msg) {
+        const p = selectedPiece();
+        if (!p) return;
+        const minR = Math.min(...p.cells.map(c => c.r));
+        const minC = Math.min(...p.cells.map(c => c.c));
+        const local = p.cells.map(c => ({ r: c.r - minR, c: c.c - minC }));
+        const transformed = normalize(fn(local));
+        let cells = transformed.map(b => ({ r: minR + b.r, c: minC + b.c }));
+        const maxR = Math.max(...cells.map(c => c.r));
+        const maxC = Math.max(...cells.map(c => c.c));
+        let dr = 0, dc = 0;
+        if (maxR >= ROWS) dr = ROWS - 1 - maxR;
+        if (maxC >= COLS) dc = COLS - 1 - maxC;
+        const minNR = Math.min(...cells.map(c => c.r)) + dr;
+        const minNC = Math.min(...cells.map(c => c.c)) + dc;
+        if (minNR < 0) dr -= minNR;
+        if (minNC < 0) dc -= minNC;
+        cells = cells.map(c => ({ r: c.r + dr, c: c.c + dc }));
+        // 允许重叠：仅保证在网格内，直接应用
+        p.cells = cells;
+        paintPieces();
+        checkFull();
+    }
+
+    function rotate(local) {
+        const maxR = Math.max(...local.map(p => p.r));
+        return local.map(p => ({ r: p.c, c: maxR - p.r }));
+    }
+    function flip(local) {
+        const maxC = Math.max(...local.map(p => p.c));
+        return local.map(p => ({ r: p.r, c: maxC - p.c }));
+    }
+
+    function deleteSelected() {
+        if (selectedId == null) return;
+        pieces = pieces.filter(p => p.id !== selectedId);
+        selectedId = null;
+        paintPieces();
+        updateToolbar();
+        checkFull();
+    }
+
+    function updateToolbar() {
+        const has = selectedId != null && selectedPiece();
+        rotateBtn.disabled = !has;
+        flipBtn.disabled = !has;
+        deleteBtn.disabled = !has;
+    }
+
+    /* ---------- 拼满判定（保存要求：无重叠且填满） ---------- */
+    function isFull() {
+        return evaluate().full;
+    }
+
+    let wasFull = false;
+    function checkFull(silent) {
+        const { full, overlap } = evaluate();
+        saveBtn.disabled = !full;
+        if (overlap) puzzleHint.textContent = '有重叠，不能保存';
+        else if (full) puzzleHint.textContent = '已拼满，可保存 ✅';
+        else puzzleHint.textContent = '填满 20 格 = 5 块';
+        if (full && !wasFull && !silent) toast('🎉 拼满啦！可以保存方案', 'success');
+        wasFull = full;
+    }
+
+    /* ---------- 方案库 ---------- */
+    function clonePieces() {
+        return pieces.map(p => ({ color: p.color, cells: p.cells.map(c => ({ ...c })) }));
+    }
+
+    function saveScheme() {
+        if (!isFull()) { toast('请先填满拼摆区', 'error'); return; }
+        if (editingSchemeId != null) {
+            const sc = schemes.find(s => s.id === editingSchemeId);
+            if (sc) { sc.pieces = clonePieces(); toast('方案已更新', 'success'); }
+            editingSchemeId = null;
+        } else {
+            schemeSeq++;
+            schemes.push({ id: schemeSeq, name: '方案 ' + schemeSeq, pieces: clonePieces() });
+            toast('方案已保存', 'success');
+        }
+        renderSchemes();
+        updateSaveBtnLabel();
+    }
+
+    function deleteScheme(id) {
+        schemes = schemes.filter(s => s.id !== id);
+        if (editingSchemeId === id) editingSchemeId = null;
+        renderSchemes();
+        updateSaveBtnLabel();
+    }
+
+    function editScheme(id) {
+        const sc = schemes.find(s => s.id === id);
+        if (!sc) return;
+        pieces = sc.pieces.map(p => ({ id: ++pieceSeq, color: p.color, cells: p.cells.map(c => ({ ...c })) }));
+        selectedId = null;
+        editingSchemeId = id;
+        paintPieces();
+        updateToolbar();
+        checkFull(true);
+        renderSchemes();
+        updateSaveBtnLabel();
+        toast('已载入「' + sc.name + '」，修改后可再次保存', 'success');
+    }
+
+    function updateSaveBtnLabel() {
+        saveBtn.textContent = editingSchemeId != null ? '💾 更新方案' : '💾 保存方案';
+    }
+
+    function renderSchemes() {
+        schemeCount.textContent = schemes.length + ' 个';
+        schemeList.innerHTML = '';
+        if (!schemes.length) {
+            const empty = document.createElement('div');
+            empty.className = 'scheme-empty';
+            empty.textContent = '还没有保存的方案，拼满拼摆区后点「保存方案」吧～';
+            schemeList.appendChild(empty);
+            return;
+        }
+        schemes.forEach(sc => {
+            const card = document.createElement('div');
+            card.className = 'scheme-card' + (sc.id === editingSchemeId ? ' editing' : '');
+
+            const preview = document.createElement('div');
+            preview.className = 'scheme-preview';
+            preview.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+            preview.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
+            const colorMap = {};
+            sc.pieces.forEach(p => p.cells.forEach(c => { colorMap[c.r + ',' + c.c] = p.color; }));
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'scheme-cell';
+                    const col = colorMap[r + ',' + c];
+                    if (col) { cell.classList.add('filled'); cell.style.background = col; }
+                    else cell.style.background = '#f4f9fd';
+                    preview.appendChild(cell);
+                }
+            }
+
+            const meta = document.createElement('div');
+            meta.className = 'scheme-meta';
+            const name = document.createElement('div');
+            name.className = 'scheme-name';
+            name.textContent = sc.name + (sc.id === editingSchemeId ? '（编辑中）' : '');
+            const actions = document.createElement('div');
+            actions.className = 'scheme-actions';
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn primary';
+            editBtn.textContent = '编辑';
+            editBtn.addEventListener('click', () => editScheme(sc.id));
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn danger';
+            delBtn.textContent = '删除';
+            delBtn.addEventListener('click', () => deleteScheme(sc.id));
+            actions.append(editBtn, delBtn);
+            meta.append(name, actions);
+
+            card.append(preview, meta);
+            schemeList.appendChild(card);
+        });
+    }
+
+    /* ---------- 事件 ---------- */
+    rotateBtn.addEventListener('click', () => transformSelected(rotate, '旋转'));
+    flipBtn.addEventListener('click', () => transformSelected(flip, '翻转'));
+    deleteBtn.addEventListener('click', deleteSelected);
+    clearBtn.addEventListener('click', () => {
+        pieces = [];
+        selectedId = null;
+        editingSchemeId = null;
+        paintPieces();
+        updateToolbar();
+        checkFull();
+        renderSchemes();
+        updateSaveBtnLabel();
+        toast('已清空拼图');
+    });
+    saveBtn.addEventListener('click', saveScheme);
+
+    puzzleGrid.addEventListener('pointerdown', onGridPointerDown);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+
+    helpBtn.addEventListener('click', () => helpModal.classList.add('show'));
+    document.querySelectorAll('[data-close]').forEach(el => {
+        el.addEventListener('click', () => el.closest('.modal').classList.remove('show'));
+    });
+    helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.classList.remove('show'); });
+
+    /* ---------- 初始化 ---------- */
+    buildLibrary();
+    buildGrid();
+    renderSchemes();
+    updateToolbar();
+    updateSaveBtnLabel();
+})();
 </script>
 </body>
 </html>

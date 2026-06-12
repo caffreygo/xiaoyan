@@ -35,8 +35,7 @@
         }
 
         .app {
-            width: 90%;
-            max-width: 1180px;
+            width: 80%;
             background: var(--card-bg);
             border: 3px solid var(--border);
             border-radius: 28px;
@@ -168,7 +167,7 @@
         /* 工作区：拼图大挑战 + 图形库 */
         .workspace {
             display: grid;
-            grid-template-columns: 430px 1fr;
+            grid-template-columns: 360px 1fr;
             gap: 20px;
             padding: 20px;
         }
@@ -206,7 +205,7 @@
         /* 拼图舞台 */
         .puzzle-stage {
             flex: 1;
-            min-height: 420px;
+            min-height: 380px;
             padding: 20px;
             display: flex;
             align-items: center;
@@ -239,8 +238,8 @@
         .library-list {
             padding: 16px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             align-content: start;
         }
 
@@ -262,7 +261,7 @@
         .lib-item:active { cursor: grabbing; }
 
         .lib-mini { display: grid; gap: 0; }
-        .lib-cell { width: 40px; height: 40px; border-radius: 0; }
+        .lib-cell { width: 36px; height: 36px; border-radius: 0; }
         .lib-cell.filled { box-shadow: inset 0 0 0 1px rgba(26, 59, 79, 0.5); }
 
         /* 拖拽幽灵 */
@@ -351,6 +350,10 @@
             cursor: pointer;
         }
         .win-emoji { font-size: 3.5rem; text-align: center; margin-bottom: 8px; }
+
+        @media (max-width: 1400px) {
+            .app { width: 96%; }
+        }
 
         @media (max-width: 820px) {
             body { padding: 20px 8px; }
@@ -499,6 +502,26 @@
         );
     }
 
+    // 仅判断是否在网格范围内（允许重叠）
+    function inBounds(cells) {
+        return cells.every(c => c.r >= 0 && c.r < rows && c.c >= 0 && c.c < cols);
+    }
+
+    // 整体评估：是否有重叠 / 是否无重叠地填满
+    function evaluate() {
+        const count = {};
+        for (const p of pieces) {
+            for (const c of p.cells) {
+                if (c.r < 0 || c.r >= rows || c.c < 0 || c.c >= cols) continue;
+                const k = c.r + ',' + c.c;
+                count[k] = (count[k] || 0) + 1;
+            }
+        }
+        const overlap = Object.values(count).some(v => v > 1);
+        const filled = Object.keys(count).length;
+        return { overlap, full: filled === cols * rows && !overlap };
+    }
+
     /* ---------- 渲染网格 ---------- */
     function buildGrid() {
         puzzleGrid.innerHTML = '';
@@ -586,8 +609,8 @@
 
             const mini = document.createElement('div');
             mini.className = 'lib-mini';
-            mini.style.gridTemplateColumns = `repeat(${cc}, 40px)`;
-            mini.style.gridTemplateRows = `repeat(${r}, 40px)`;
+            mini.style.gridTemplateColumns = `repeat(${cc}, 36px)`;
+            mini.style.gridTemplateRows = `repeat(${r}, 36px)`;
 
             const filled = new Set(blocks.map(b => b.r + ',' + b.c));
             for (let rr = 0; rr < r; rr++) {
@@ -699,7 +722,7 @@
         const originR = h.r - drag.grab.r;
         const originC = h.c - drag.grab.c;
         const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
-        const ok = canPlace(cells, null);
+        const ok = inBounds(cells);
         cells.forEach(c => {
             const cell = cellAt(c.r, c.c);
             if (cell) cell.classList.add(ok ? 'preview-ok' : 'preview-bad');
@@ -721,7 +744,7 @@
             const originR = h.r - drag.grab.r;
             const originC = h.c - drag.grab.c;
             const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
-            if (canPlace(cells, null)) {
+            if (inBounds(cells)) {
                 const id = ++pieceSeq;
                 pieces.push({ id, color: drag.color, cells });
                 selectedId = id;
@@ -787,10 +810,7 @@
         if (minNR < 0) dr -= minNR;
         if (minNC < 0) dc -= minNC;
         cells = cells.map(c => ({ r: c.r + dr, c: c.c + dc }));
-        if (!canPlace(cells, p.id)) {
-            toast('空间不足，无法' + msg, 'error');
-            return;
-        }
+        // 允许重叠：仅保证在网格内，直接应用
         p.cells = cells;
         paintPieces();
         checkWin();
@@ -811,6 +831,7 @@
         selectedId = null;
         paintPieces();
         updateToolbar();
+        checkWin();
     }
 
     function updateToolbar() {
@@ -820,14 +841,16 @@
         deleteBtn.disabled = !has;
     }
 
-    /* ---------- 胜负 ---------- */
+    /* ---------- 胜负（需无重叠且填满） ---------- */
+    let wasWon = false;
     function checkWin() {
-        const total = pieces.reduce((n, p) => n + p.cells.length, 0);
-        if (total === cols * rows && cols * rows > 0) {
+        const { full } = evaluate();
+        if (full && !wasWon) {
             winText.textContent = `你用 ${pieces.length} 块四连方填满了 ${cols}×${rows} 的网格！`;
             winModal.classList.add('show');
             toast('🎉 挑战成功！', 'success');
         }
+        wasWon = full;
     }
 
     /* ---------- 挑战提示 ---------- */
@@ -849,6 +872,7 @@
         rowValue.textContent = rows;
         pieces = [];
         selectedId = null;
+        wasWon = false;
         buildGrid();
         updateToolbar();
         updateHint();
@@ -862,6 +886,7 @@
     clearBtn.addEventListener('click', () => {
         pieces = [];
         selectedId = null;
+        wasWon = false;
         paintPieces();
         updateToolbar();
         toast('已清空拼图');
