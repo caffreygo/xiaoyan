@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四连方 · 导航中心</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-deep: #0f172a;
+      --bg-card: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-1: #38bdf8;
+      --accent-2: #a78bfa;
+      --accent-3: #34d399;
+      --glow-1: rgba(56, 189, 248, 0.35);
+      --glow-2: rgba(167, 139, 250, 0.35);
+      --glow-3: rgba(52, 211, 153, 0.35);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* 背景装饰 */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+      animation: float 12s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 480px;
+      height: 480px;
+      background: var(--glow-1);
+      top: -120px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: var(--glow-2);
+      bottom: -80px;
+      right: -60px;
+      animation-delay: -4s;
+    }
+
+    .orb-3 {
+      width: 300px;
+      height: 300px;
+      background: var(--glow-3);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -8s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 30px) scale(0.95); }
+    }
+
+    /* 网格纹理 */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* 页头 */
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .logo-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .tetromino {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .tetromino:nth-child(1) { background: #38bdf8; animation-delay: 0s; }
+    .tetromino:nth-child(2) { background: #a78bfa; animation-delay: 0.2s; }
+    .tetromino:nth-child(3) { background: #34d399; animation-delay: 0.4s; }
+    .tetromino:nth-child(4) { background: #fbbf24; animation-delay: 0.6s; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.85); opacity: 0.7; }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* 卡片网格 */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .nav-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 32px 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      text-decoration: none;
+      color: inherit;
+      backdrop-filter: blur(12px);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+
+    .nav-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 20px;
+    }
+
+    .nav-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .nav-card-1:hover { border-color: var(--accent-1); box-shadow: 0 20px 60px var(--glow-1); }
+    .nav-card-1::before { background: linear-gradient(135deg, var(--glow-1), transparent 60%); }
+    .nav-card-2:hover { border-color: var(--accent-2); box-shadow: 0 20px 60px var(--glow-2); }
+    .nav-card-2::before { background: linear-gradient(135deg, var(--glow-2), transparent 60%); }
+    .nav-card-3:hover { border-color: var(--accent-3); box-shadow: 0 20px 60px var(--glow-3); }
+    .nav-card-3::before { background: linear-gradient(135deg, var(--glow-3), transparent 60%); }
+
+    .nav-card:hover::before { opacity: 1; }
+
+    .card-icon {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .nav-card-1 .card-icon { background: rgba(56, 189, 248, 0.15); }
+    .nav-card-2 .card-icon { background: rgba(167, 139, 250, 0.15); }
+    .nav-card-3 .card-icon { background: rgba(52, 211, 153, 0.15); }
+
+    .card-tag {
+      position: relative;
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+
+    .nav-card-1 .card-tag { color: var(--accent-1); background: rgba(56, 189, 248, 0.12); }
+    .nav-card-2 .card-tag { color: var(--accent-2); background: rgba(167, 139, 250, 0.12); }
+    .nav-card-3 .card-tag { color: var(--accent-3); background: rgba(52, 211, 153, 0.12); }
+
+    .card-title {
+      position: relative;
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .card-desc {
+      position: relative;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      flex: 1;
+      margin-bottom: 24px;
+    }
+
+    .card-arrow {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: gap 0.25s ease;
+    }
+
+    .nav-card:hover .card-arrow { gap: 14px; }
+
+    .nav-card-1 .card-arrow { color: var(--accent-1); }
+    .nav-card-2 .card-arrow { color: var(--accent-2); }
+    .nav-card-3 .card-arrow { color: var(--accent-3); }
+
+    .arrow-icon {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      transition: transform 0.25s ease;
+    }
+
+    .nav-card-1 .arrow-icon { background: rgba(56, 189, 248, 0.2); }
+    .nav-card-2 .arrow-icon { background: rgba(167, 139, 250, 0.2); }
+    .nav-card-3 .arrow-icon { background: rgba(52, 211, 153, 0.2); }
+
+    .nav-card:hover .arrow-icon { transform: translateX(2px); }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      margin-top: 56px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 40px 16px 60px; }
+      header { margin-bottom: 36px; }
+      .nav-grid { gap: 16px; }
+      .nav-card { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="grid-overlay"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo-block">
+        <span class="tetromino"></span>
+        <span class="tetromino"></span>
+        <span class="tetromino"></span>
+        <span class="tetromino"></span>
+      </div>
+      <h1>四连方</h1>
+      <p class="subtitle">探索、拼搭、旋转——三种方式体验经典四连方，选择下方入口开始</p>
+    </header>
+
+    <nav class="nav-grid">
+      <a href="a.html" class="nav-card nav-card-1">
+        <div class="card-icon">🧩</div>
+        <span class="card-tag">拼图工坊</span>
+        <h2 class="card-title">四连方挑战</h2>
+        <p class="card-desc">在网格画布上自由拼搭四连方块，锻炼空间想象力与组合逻辑，适合动手实践与创意探索。</p>
+        <span class="card-arrow">
+          进入工坊
+          <span class="arrow-icon">→</span>
+        </span>
+      </a>
+
+      <a href="b.html" class="nav-card nav-card-2">
+        <div class="card-icon">📘</div>
+        <span class="card-tag">交互课件</span>
+        <h2 class="card-title">蔚蓝创意版</h2>
+        <p class="card-desc">以清新蓝色界面呈现的教学互动课件，拖拽操作直观流畅，适合课堂演示与自主学习。</p>
+        <span class="card-arrow">
+          打开课件
+          <span class="arrow-icon">→</span>
+        </span>
+      </a>
+
+      <a href="c.html" class="nav-card nav-card-3">
+        <div class="card-icon">🎮</div>
+        <span class="card-tag">轻量游戏</span>
+        <h2 class="card-title">单击旋转</h2>
+        <p class="card-desc">轻快节奏的四连方小游戏，单击即可旋转方块，在有限空间内完成拼合挑战，趣味十足。</p>
+        <span class="card-arrow">
+          开始游戏
+          <span class="arrow-icon">→</span>
+        </span>
+      </a>
+    </nav>
+
+    <footer>四连方 Demo 合集</footer>
+  </div>
+</body>
+</html>
