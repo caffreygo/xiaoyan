@@ -194,10 +194,18 @@
             padding: 10px;
             background: #FAFCFD;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .shape-preview {
+            flex: 1;
+            width: 100%;
+            min-height: 110px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
         }
 
         .shape-mini {
@@ -208,27 +216,30 @@
         .mini-cell { width: 40px; height: 40px; border-radius: 0; }
         .mini-cell.filled { box-shadow: inset 0 0 0 1px rgba(26, 59, 79, 0.5); }
 
-        .delete-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 24px;
-            height: 24px;
+        .shape-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .act-btn {
+            width: 32px;
+            height: 32px;
             border: none;
             border-radius: 50%;
-            background: var(--primary-red);
-            color: #fff;
-            font-size: 0.9rem;
-            line-height: 1;
             cursor: pointer;
+            font-size: 0.95rem;
+            line-height: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.85;
-            transition: opacity 0.15s, transform 0.08s;
+            color: #fff;
+            transition: transform 0.08s, opacity 0.15s;
         }
-        .delete-btn:hover { opacity: 1; }
-        .delete-btn:active { transform: scale(0.9); }
+        .act-btn:hover { opacity: 0.9; }
+        .act-btn:active { transform: scale(0.9); }
+        .act-btn.rotate { background: #3b82b6; }
+        .act-btn.flip { background: #f59e0b; }
+        .act-btn.del { background: #c0473b; }
 
         .toast {
             position: fixed;
@@ -477,6 +488,27 @@
         toast('图形已删除');
     }
 
+    function rotateBlocks(blocks) {
+        const maxR = Math.max(...blocks.map(b => b.r));
+        return blocks.map(b => ({ r: b.c, c: maxR - b.r }));
+    }
+    function flipBlocks(blocks) {
+        const maxC = Math.max(...blocks.map(b => b.c));
+        return blocks.map(b => ({ r: b.r, c: maxC - b.c }));
+    }
+    function rotateShape(id) {
+        const s = library.find(x => x.id === id);
+        if (!s) return;
+        s.blocks = normalize(rotateBlocks(s.blocks));
+        renderLibrary();
+    }
+    function flipShape(id) {
+        const s = library.find(x => x.id === id);
+        if (!s) return;
+        s.blocks = normalize(flipBlocks(s.blocks));
+        renderLibrary();
+    }
+
     // 渲染图形库
     function renderLibrary() {
         libraryCounter.textContent = `${library.length} / ${MAX_SHAPES}`;
@@ -519,14 +551,34 @@
                     mini.appendChild(mc);
                 }
             }
-            card.appendChild(mini);
+            const preview = document.createElement('div');
+            preview.className = 'shape-preview';
+            preview.appendChild(mini);
+            card.appendChild(preview);
+
+            const actions = document.createElement('div');
+            actions.className = 'shape-actions';
+
+            const rot = document.createElement('button');
+            rot.className = 'act-btn rotate';
+            rot.textContent = '🔄';
+            rot.title = '旋转';
+            rot.addEventListener('click', () => rotateShape(shape.id));
+
+            const flp = document.createElement('button');
+            flp.className = 'act-btn flip';
+            flp.textContent = '🪞';
+            flp.title = '翻转';
+            flp.addEventListener('click', () => flipShape(shape.id));
 
             const del = document.createElement('button');
-            del.className = 'delete-btn';
+            del.className = 'act-btn del';
             del.textContent = '×';
             del.title = '删除该图形';
             del.addEventListener('click', () => deleteShape(shape.id));
-            card.appendChild(del);
+
+            actions.append(rot, flp, del);
+            card.appendChild(actions);
 
             grid.appendChild(card);
         });
