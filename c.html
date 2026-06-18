@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>拓展层作业：定制瓷板画纹样设计</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
         :root {
             --primary: #2c7da0;
@@ -52,6 +56,7 @@
             text-align: center;
             border-bottom: 2px solid #eef4fa;
         }
+
         .header h1 {
             margin: 0;
             font-size: clamp(1.3rem, 4vw, 2rem);
@@ -85,7 +90,11 @@
             justify-content: center;
             transition: all 0.2s;
         }
-        .help-btn:hover { background: var(--primary); color: #fff; }
+
+        .help-btn:hover {
+            background: var(--primary);
+            color: #fff;
+        }
 
         .controls-bar {
             display: flex;
@@ -96,7 +105,13 @@
             background: #f0f7fc;
             border-bottom: 2px solid var(--border);
         }
-        .divider { width: 2px; height: 26px; background: #cbdde9; margin: 0 4px; }
+
+        .divider {
+            width: 2px;
+            height: 26px;
+            background: #cbdde9;
+            margin: 0 4px;
+        }
 
         .btn {
             padding: 9px 18px;
@@ -109,14 +124,44 @@
             color: var(--primary-hover);
             transition: all 0.15s;
         }
-        .btn:hover:not(:disabled) { transform: translateY(-1px); }
-        .btn:active:not(:disabled) { transform: translateY(1px); }
-        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-        .btn.primary { background: linear-gradient(95deg, var(--primary), var(--primary-light)); color: #fff; }
-        .btn.rotate { background: #3b82b6; color: #fff; }
-        .btn.flip { background: #f59e0b; color: #fff; }
-        .btn.danger { background: var(--danger); color: #fff; }
-        .btn.save { background: linear-gradient(95deg, #2E7D32, #43a047); color: #fff; }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .btn.primary {
+            background: linear-gradient(95deg, var(--primary), var(--primary-light));
+            color: #fff;
+        }
+
+        .btn.rotate {
+            background: #3b82b6;
+            color: #fff;
+        }
+
+        .btn.flip {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .btn.danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn.save {
+            background: linear-gradient(95deg, #2E7D32, #43a047);
+            color: #fff;
+        }
 
         .workspace {
             display: grid;
@@ -133,6 +178,7 @@
             overflow: hidden;
             min-width: 0;
         }
+
         .panel-title {
             padding: 12px 16px;
             background: #fafdff;
@@ -144,6 +190,7 @@
             align-items: center;
             gap: 8px;
         }
+
         .panel-title .hint {
             font-size: 0.74rem;
             font-weight: 600;
@@ -162,6 +209,7 @@
             gap: 14px;
             align-content: start;
         }
+
         .lib-item {
             border: 1px solid var(--border);
             border-radius: 14px;
@@ -175,11 +223,30 @@
             overflow: hidden;
             transition: transform 0.12s, box-shadow 0.12s;
         }
-        .lib-item:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(44,125,160,0.18); }
-        .lib-item:active { cursor: grabbing; }
-        .lib-mini { display: grid; gap: 0; }
-        .lib-cell { width: 24px; height: 24px; border-radius: 0; }
-        .lib-cell.filled { box-shadow: inset 0 0 0 1px var(--seam); }
+
+        .lib-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(44, 125, 160, 0.18);
+        }
+
+        .lib-item:active {
+            cursor: grabbing;
+        }
+
+        .lib-mini {
+            display: grid;
+            gap: 0;
+        }
+
+        .lib-cell {
+            width: 24px;
+            height: 24px;
+            border-radius: 0;
+        }
+
+        .lib-cell.filled {
+            box-shadow: inset 0 0 0 1px var(--seam);
+        }
 
         /* 拼摆区 */
         .puzzle-stage {
@@ -191,6 +258,7 @@
             justify-content: center;
             background: radial-gradient(circle at 20% 20%, #f4f9fd, #eaf3fb);
         }
+
         .puzzle-grid {
             display: grid;
             gap: 0;
@@ -200,15 +268,27 @@
             touch-action: none;
             box-shadow: 0 6px 18px rgba(44, 125, 160, 0.18);
         }
+
         .pcell {
             border: 1px solid var(--grid-line);
             background: var(--cell-empty);
             min-width: 0;
             min-height: 0;
         }
-        .pcell.filled { border-color: var(--seam); }
-        .pcell.preview-ok { outline: 2px dashed #2E7D32; outline-offset: -3px; }
-        .pcell.preview-bad { outline: 2px dashed #c0473b; outline-offset: -3px; }
+
+        .pcell.filled {
+            border-color: var(--seam);
+        }
+
+        .pcell.preview-ok {
+            outline: 2px dashed #2E7D32;
+            outline-offset: -3px;
+        }
+
+        .pcell.preview-bad {
+            outline: 2px dashed #c0473b;
+            outline-offset: -3px;
+        }
 
         /* 方案库 */
         .scheme-list {
@@ -220,6 +300,7 @@
             max-height: 520px;
             align-content: start;
         }
+
         .scheme-empty {
             color: var(--text-muted);
             font-size: 0.86rem;
@@ -228,6 +309,7 @@
             border: 2px dashed #d7e0ea;
             border-radius: 14px;
         }
+
         .scheme-card {
             border: 1px solid var(--border);
             border-radius: 14px;
@@ -237,652 +319,768 @@
             align-items: center;
             gap: 12px;
         }
-        .scheme-card.editing { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(44,125,160,0.25); }
+
+        .scheme-card.editing {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(44, 125, 160, 0.25);
+        }
+
         .scheme-preview {
             display: grid;
             gap: 0;
             border: 1px solid var(--seam);
             flex-shrink: 0;
         }
-        .scheme-cell { width: 14px; height: 14px; }
-        .scheme-cell.filled { box-shadow: inset 0 0 0 1px var(--seam); }
-        .scheme-meta { flex: 1; min-width: 0; }
-        .scheme-name { font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; }
-        .scheme-actions { display: flex; gap: 8px; }
-        .scheme-actions .btn { padding: 5px 12px; font-size: 0.76rem; }
+
+        .scheme-cell {
+            width: 14px;
+            height: 14px;
+        }
+
+        .scheme-cell.filled {
+            box-shadow: inset 0 0 0 1px var(--seam);
+        }
+
+        .scheme-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .scheme-name {
+            font-weight: 700;
+            font-size: 0.92rem;
+            margin-bottom: 8px;
+        }
+
+        .scheme-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .scheme-actions .btn {
+            padding: 5px 12px;
+            font-size: 0.76rem;
+        }
 
         /* 拖拽幽灵 */
         .ghost {
-            position: fixed; top: 0; left: 0;
-            pointer-events: none; z-index: 3000;
-            display: grid; gap: 0; opacity: 0.85;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 3000;
+            display: grid;
+            gap: 0;
+            opacity: 0.85;
         }
-        .ghost-cell.filled { box-shadow: inset 0 0 0 1px var(--seam); }
+
+        .ghost-cell.filled {
+            box-shadow: inset 0 0 0 1px var(--seam);
+        }
 
         /* Toast */
         .toast-container {
-            position: fixed; top: 120px; left: 50%;
+            position: fixed;
+            top: 120px;
+            left: 50%;
             transform: translateX(-50%);
-            display: flex; flex-direction: column; gap: 10px;
-            z-index: 4000; pointer-events: none; align-items: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 4000;
+            pointer-events: none;
+            align-items: center;
         }
+
         .toast {
-            background: #1e2f3c; color: #fff;
-            padding: 14px 32px; border-radius: 60px;
-            font-size: 1.05rem; font-weight: 700;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-            opacity: 0; transform: translateY(-12px);
+            background: #1e2f3c;
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 60px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+            opacity: 0;
+            transform: translateY(-12px);
             transition: opacity 0.25s, transform 0.25s;
-            max-width: 90vw; text-align: center;
+            max-width: 90vw;
+            text-align: center;
         }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast.success { background: var(--primary); }
-        .toast.error { background: var(--danger); }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: var(--primary);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
 
         /* 模态框 */
         .modal {
-            display: none; position: fixed; inset: 0;
-            background: rgba(30, 60, 80, 0.7); backdrop-filter: blur(4px);
-            z-index: 5000; justify-content: center; align-items: center; padding: 20px;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 60, 80, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        .modal.show { display: flex; }
+
+        .modal.show {
+            display: flex;
+        }
+
         .modal-content {
-            background: #fff; padding: 28px 32px; border-radius: 24px;
-            width: 480px; max-width: 100%; border-top: 6px solid var(--primary);
-            position: relative; box-shadow: 0 25px 40px rgba(0,0,0,0.2);
+            background: #fff;
+            padding: 28px 32px;
+            border-radius: 24px;
+            width: 480px;
+            max-width: 100%;
+            border-top: 6px solid var(--primary);
+            position: relative;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.2);
         }
-        .modal-content h2 { margin-top: 0; color: var(--primary); }
-        .modal-content p, .modal-content li { line-height: 1.7; font-size: 0.95rem; }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .modal-content p,
+        .modal-content li {
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
         .close-btn {
-            position: absolute; top: 16px; right: 20px;
-            font-size: 1.6rem; color: #8aaec0; cursor: pointer; border: none; background: none;
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 1.6rem;
+            color: #8aaec0;
+            cursor: pointer;
+            border: none;
+            background: none;
         }
-        .close-btn:hover { color: var(--primary); }
+
+        .close-btn:hover {
+            color: var(--primary);
+        }
+
         .modal-content .ok-btn {
-            margin-top: 16px; width: 100%; padding: 12px; border: none;
-            border-radius: 40px; background: var(--primary); color: #fff;
-            font-weight: 700; font-size: 1rem; cursor: pointer;
+            margin-top: 16px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
         }
 
         @media (max-width: 1400px) {
-            .app { width: 96%; }
+            .app {
+                width: 96%;
+            }
         }
 
         @media (max-width: 980px) {
-            body { padding: 20px 8px; }
-            .app { width: 96%; }
-            .workspace { grid-template-columns: 1fr; }
-            .scheme-list { max-height: none; }
+            body {
+                padding: 20px 8px;
+            }
+
+            .app {
+                width: 96%;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .scheme-list {
+                max-height: none;
+            }
         }
     </style>
 </head>
+
 <body>
-<div class="app">
-    <div class="header">
-        <button id="helpBtn" class="help-btn">?</button>
-        <h1>拓展层作业：定制瓷板画纹样设计</h1>
-    </div>
-
-    <div class="controls-bar">
-        <button id="rotateBtn" class="btn rotate" disabled>🔄 旋转</button>
-        <button id="flipBtn" class="btn flip" disabled>🪞 翻转</button>
-        <button id="deleteBtn" class="btn danger" disabled>❌ 删除</button>
-        <div class="divider"></div>
-        <button id="clearBtn" class="btn">♻️ 清空拼图</button>
-        <div class="divider"></div>
-        <button id="saveBtn" class="btn save" disabled>💾 保存方案</button>
-    </div>
-
-    <div class="workspace">
-        <div class="panel">
-            <div class="panel-title"><span>📦 图形库</span><span class="hint">可重复拖取</span></div>
-            <div class="library-list" id="libraryList"></div>
+    <div class="app">
+        <div class="header">
+            <button id="helpBtn" class="help-btn">?</button>
+            <h1>拓展层作业：定制瓷板画纹样设计</h1>
         </div>
 
-        <div class="panel">
-            <div class="panel-title">
-                <span>🧩 瓷板画设计 (5 × 4)</span>
-                <span class="hint" id="puzzleHint">填满 20 格 = 5 块</span>
+        <div class="controls-bar">
+            <button id="rotateBtn" class="btn rotate" disabled>🔄 旋转</button>
+            <button id="flipBtn" class="btn flip" disabled>🪞 翻转</button>
+            <button id="deleteBtn" class="btn danger" disabled>❌ 删除</button>
+            <div class="divider"></div>
+            <button id="clearBtn" class="btn">♻️ 清空拼图</button>
+            <div class="divider"></div>
+            <button id="saveBtn" class="btn save" disabled>💾 保存方案</button>
+        </div>
+
+        <div class="workspace">
+            <div class="panel">
+                <div class="panel-title"><span>📦 图形库</span><span class="hint">可重复拖取</span></div>
+                <div class="library-list" id="libraryList"></div>
             </div>
-            <div class="puzzle-stage">
-                <div class="puzzle-grid" id="puzzleGrid"></div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <span>🧩 瓷板画设计 (5 × 4)</span>
+                    <span class="hint" id="puzzleHint">填满 20 格 = 5 块</span>
+                </div>
+                <div class="puzzle-stage">
+                    <div class="puzzle-grid" id="puzzleGrid"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title"><span>🗂️ 方案库</span><span class="hint" id="schemeCount">0 个</span></div>
+                <div class="scheme-list" id="schemeList"></div>
             </div>
         </div>
+    </div>
 
-        <div class="panel">
-            <div class="panel-title"><span>🗂️ 方案库</span><span class="hint" id="schemeCount">0 个</span></div>
-            <div class="scheme-list" id="schemeList"></div>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" data-close>&times;</button>
+            <h2>📖 玩法说明</h2>
+            <p>1. 从 <strong>图形库</strong> 拖动四连方到中间 <strong>5×4 拼摆区</strong>，图形可重复使用。</p>
+            <p>2. 点击已放置图形可选中，使用 <strong>旋转 / 翻转 / 删除</strong>。</p>
+            <p>3. 当 <strong>无重叠地填满整个拼摆区</strong> 后，<strong>保存方案</strong> 按钮可用，把当前拼法存入右侧 <strong>方案库</strong>。</p>
+            <p>4. 方案库中的每个方案都可以 <strong>编辑</strong>（载回拼摆区修改后再保存）或 <strong>删除</strong>。</p>
+            <button class="ok-btn" data-close>开始设计</button>
         </div>
     </div>
-</div>
 
-<div id="toastContainer" class="toast-container"></div>
+    <script>
+        (function () {
+            const COLS = 5, ROWS = 4;
 
-<div id="helpModal" class="modal">
-    <div class="modal-content">
-        <button class="close-btn" data-close>&times;</button>
-        <h2>📖 玩法说明</h2>
-        <p>1. 从 <strong>图形库</strong> 拖动四连方到中间 <strong>5×4 拼摆区</strong>，图形可重复使用。</p>
-        <p>2. 点击已放置图形可选中，使用 <strong>旋转 / 翻转 / 删除</strong>。</p>
-        <p>3. 当 <strong>无重叠地填满整个拼摆区</strong> 后，<strong>保存方案</strong> 按钮可用，把当前拼法存入右侧 <strong>方案库</strong>。</p>
-        <p>4. 方案库中的每个方案都可以 <strong>编辑</strong>（载回拼摆区修改后再保存）或 <strong>删除</strong>。</p>
-        <button class="ok-btn" data-close>开始设计</button>
-    </div>
-</div>
+            const SHAPE_DEFS = [
+                { name: 'I', color: '#2c7da0', blocks: [[0, 0], [0, 1], [0, 2], [0, 3]] },
+                { name: 'O', color: '#f59e0b', blocks: [[0, 0], [0, 1], [1, 0], [1, 1]] },
+                { name: 'T', color: '#2E7D32', blocks: [[0, 0], [0, 1], [0, 2], [1, 1]] },
+                { name: 'L', color: '#8E24AA', blocks: [[0, 0], [1, 0], [2, 0], [2, 1]] },
+                { name: 'S', color: '#c0473b', blocks: [[0, 1], [0, 2], [1, 0], [1, 1]] }
+            ].map(s => ({ ...s, blocks: s.blocks.map(([r, c]) => ({ r, c })) }));
 
-<script>
-(function () {
-    const COLS = 5, ROWS = 4;
+            let pieces = [];
+            let selectedId = null;
+            let pieceSeq = 0;
+            let drag = null;
+            let schemes = [];
+            let schemeSeq = 0;
+            let editingSchemeId = null;
 
-    const SHAPE_DEFS = [
-        { name: 'I', color: '#2c7da0', blocks: [[0,0],[0,1],[0,2],[0,3]] },
-        { name: 'O', color: '#f59e0b', blocks: [[0,0],[0,1],[1,0],[1,1]] },
-        { name: 'T', color: '#2E7D32', blocks: [[0,0],[0,1],[0,2],[1,1]] },
-        { name: 'L', color: '#8E24AA', blocks: [[0,0],[1,0],[2,0],[2,1]] },
-        { name: 'S', color: '#c0473b', blocks: [[0,1],[0,2],[1,0],[1,1]] }
-    ].map(s => ({ ...s, blocks: s.blocks.map(([r, c]) => ({ r, c })) }));
+            const puzzleGrid = document.getElementById('puzzleGrid');
+            const libraryList = document.getElementById('libraryList');
+            const schemeList = document.getElementById('schemeList');
+            const schemeCount = document.getElementById('schemeCount');
+            const puzzleHint = document.getElementById('puzzleHint');
+            const rotateBtn = document.getElementById('rotateBtn');
+            const flipBtn = document.getElementById('flipBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const helpBtn = document.getElementById('helpBtn');
+            const toastContainer = document.getElementById('toastContainer');
+            const helpModal = document.getElementById('helpModal');
 
-    let pieces = [];
-    let selectedId = null;
-    let pieceSeq = 0;
-    let drag = null;
-    let schemes = [];
-    let schemeSeq = 0;
-    let editingSchemeId = null;
-
-    const puzzleGrid = document.getElementById('puzzleGrid');
-    const libraryList = document.getElementById('libraryList');
-    const schemeList = document.getElementById('schemeList');
-    const schemeCount = document.getElementById('schemeCount');
-    const puzzleHint = document.getElementById('puzzleHint');
-    const rotateBtn = document.getElementById('rotateBtn');
-    const flipBtn = document.getElementById('flipBtn');
-    const deleteBtn = document.getElementById('deleteBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const helpBtn = document.getElementById('helpBtn');
-    const toastContainer = document.getElementById('toastContainer');
-    const helpModal = document.getElementById('helpModal');
-
-    /* ---------- 工具 ---------- */
-    function toast(msg, type = '') {
-        toastContainer.innerHTML = '';
-        const el = document.createElement('div');
-        el.className = 'toast ' + type;
-        el.textContent = msg;
-        toastContainer.appendChild(el);
-        requestAnimationFrame(() => el.classList.add('show'));
-        setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2000);
-    }
-
-    function normalize(blocks) {
-        const minR = Math.min(...blocks.map(b => b.r));
-        const minC = Math.min(...blocks.map(b => b.c));
-        return blocks.map(b => ({ r: b.r - minR, c: b.c - minC }));
-    }
-
-    function occupiedSet(excludeId) {
-        const set = new Set();
-        for (const p of pieces) {
-            if (p.id === excludeId) continue;
-            for (const c of p.cells) set.add(c.r + ',' + c.c);
-        }
-        return set;
-    }
-
-    // 仅判断是否在网格范围内（允许重叠）
-    function inBounds(cells) {
-        return cells.every(c => c.r >= 0 && c.r < ROWS && c.c >= 0 && c.c < COLS);
-    }
-
-    // 整体评估：是否有重叠 / 是否无重叠地填满
-    function evaluate() {
-        const count = {};
-        for (const p of pieces) {
-            for (const c of p.cells) {
-                if (c.r < 0 || c.r >= ROWS || c.c < 0 || c.c >= COLS) continue;
-                const k = c.r + ',' + c.c;
-                count[k] = (count[k] || 0) + 1;
+            /* ---------- 工具 ---------- */
+            function toast(msg, type = '') {
+                toastContainer.innerHTML = '';
+                const el = document.createElement('div');
+                el.className = 'toast ' + type;
+                el.textContent = msg;
+                toastContainer.appendChild(el);
+                requestAnimationFrame(() => el.classList.add('show'));
+                setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2000);
             }
-        }
-        const overlap = Object.values(count).some(v => v > 1);
-        const filled = Object.keys(count).length;
-        return { overlap, full: filled === COLS * ROWS && !overlap };
-    }
 
-    /* ---------- 拼摆区 ---------- */
-    function buildGrid() {
-        puzzleGrid.innerHTML = '';
-        puzzleGrid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-        puzzleGrid.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
-        puzzleGrid.style.aspectRatio = `${COLS} / ${ROWS}`;
-        const MAX_H = 380;
-        puzzleGrid.style.width = `min(100%, ${Math.round(MAX_H * COLS / ROWS)}px)`;
-        puzzleGrid.style.height = 'auto';
-        for (let r = 0; r < ROWS; r++) {
-            for (let c = 0; c < COLS; c++) {
-                const cell = document.createElement('div');
-                cell.className = 'pcell';
-                cell.dataset.r = r;
-                cell.dataset.c = c;
-                puzzleGrid.appendChild(cell);
+            function normalize(blocks) {
+                const minR = Math.min(...blocks.map(b => b.r));
+                const minC = Math.min(...blocks.map(b => b.c));
+                return blocks.map(b => ({ r: b.r - minR, c: b.c - minC }));
             }
-        }
-        paintPieces();
-    }
 
-    function cellAt(r, c) {
-        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return null;
-        return puzzleGrid.children[r * COLS + c];
-    }
-
-    function paintPieces() {
-        for (const cell of puzzleGrid.children) {
-            cell.className = 'pcell';
-            cell.style.background = '';
-            cell.style.boxShadow = '';
-        }
-        for (const p of pieces) {
-            for (const c of p.cells) {
-                const cell = cellAt(c.r, c.c);
-                if (!cell) continue;
-                cell.classList.add('filled');
-                cell.style.background = p.color;
+            function occupiedSet(excludeId) {
+                const set = new Set();
+                for (const p of pieces) {
+                    if (p.id === excludeId) continue;
+                    for (const c of p.cells) set.add(c.r + ',' + c.c);
+                }
+                return set;
             }
-        }
-        const sel = pieces.find(p => p.id === selectedId);
-        if (sel) {
-            const set = new Set(sel.cells.map(c => c.r + ',' + c.c));
-            const C = '#00c8ff', W = 3;
-            for (const c of sel.cells) {
-                const cell = cellAt(c.r, c.c);
-                if (!cell) continue;
-                const shadows = [];
-                if (!set.has((c.r - 1) + ',' + c.c)) shadows.push(`inset 0 ${W}px 0 0 ${C}`);
-                if (!set.has((c.r + 1) + ',' + c.c)) shadows.push(`inset 0 -${W}px 0 0 ${C}`);
-                if (!set.has(c.r + ',' + (c.c - 1))) shadows.push(`inset ${W}px 0 0 0 ${C}`);
-                if (!set.has(c.r + ',' + (c.c + 1))) shadows.push(`inset -${W}px 0 0 0 ${C}`);
-                if (shadows.length) cell.style.boxShadow = shadows.join(', ');
+
+            // 仅判断是否在网格范围内（允许重叠）
+            function inBounds(cells) {
+                return cells.every(c => c.r >= 0 && c.r < ROWS && c.c >= 0 && c.c < COLS);
             }
-        }
-    }
 
-    /* ---------- 图形库 ---------- */
-    function buildLibrary() {
-        libraryList.innerHTML = '';
-        SHAPE_DEFS.forEach((shape, idx) => {
-            const item = document.createElement('div');
-            item.className = 'lib-item';
-            const blocks = normalize(shape.blocks);
-            const maxR = Math.max(...blocks.map(b => b.r));
-            const maxC = Math.max(...blocks.map(b => b.c));
-            const r = maxR + 1, cc = maxC + 1;
-
-            const mini = document.createElement('div');
-            mini.className = 'lib-mini';
-            mini.style.gridTemplateColumns = `repeat(${cc}, 24px)`;
-            mini.style.gridTemplateRows = `repeat(${r}, 24px)`;
-            const filled = new Set(blocks.map(b => b.r + ',' + b.c));
-            for (let rr = 0; rr < r; rr++) {
-                for (let ccol = 0; ccol < cc; ccol++) {
-                    const mc = document.createElement('div');
-                    mc.className = 'lib-cell';
-                    if (filled.has(rr + ',' + ccol)) {
-                        mc.classList.add('filled');
-                        mc.style.background = shape.color;
+            // 整体评估：是否有重叠 / 是否无重叠地填满
+            function evaluate() {
+                const count = {};
+                for (const p of pieces) {
+                    for (const c of p.cells) {
+                        if (c.r < 0 || c.r >= ROWS || c.c < 0 || c.c >= COLS) continue;
+                        const k = c.r + ',' + c.c;
+                        count[k] = (count[k] || 0) + 1;
                     }
-                    mini.appendChild(mc);
+                }
+                const overlap = Object.values(count).some(v => v > 1);
+                const filled = Object.keys(count).length;
+                return { overlap, full: filled === COLS * ROWS && !overlap };
+            }
+
+            /* ---------- 拼摆区 ---------- */
+            function buildGrid() {
+                puzzleGrid.innerHTML = '';
+                puzzleGrid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+                puzzleGrid.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
+                puzzleGrid.style.aspectRatio = `${COLS} / ${ROWS}`;
+                const MAX_H = 380;
+                puzzleGrid.style.width = `min(100%, ${Math.round(MAX_H * COLS / ROWS)}px)`;
+                puzzleGrid.style.height = 'auto';
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'pcell';
+                        cell.dataset.r = r;
+                        cell.dataset.c = c;
+                        puzzleGrid.appendChild(cell);
+                    }
+                }
+                paintPieces();
+            }
+
+            function cellAt(r, c) {
+                if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return null;
+                return puzzleGrid.children[r * COLS + c];
+            }
+
+            function paintPieces() {
+                for (const cell of puzzleGrid.children) {
+                    cell.className = 'pcell';
+                    cell.style.background = '';
+                    cell.style.boxShadow = '';
+                }
+                for (const p of pieces) {
+                    for (const c of p.cells) {
+                        const cell = cellAt(c.r, c.c);
+                        if (!cell) continue;
+                        cell.classList.add('filled');
+                        cell.style.background = p.color;
+                    }
+                }
+                const sel = pieces.find(p => p.id === selectedId);
+                if (sel) {
+                    const set = new Set(sel.cells.map(c => c.r + ',' + c.c));
+                    const C = '#00c8ff', W = 3;
+                    for (const c of sel.cells) {
+                        const cell = cellAt(c.r, c.c);
+                        if (!cell) continue;
+                        const shadows = [];
+                        if (!set.has((c.r - 1) + ',' + c.c)) shadows.push(`inset 0 ${W}px 0 0 ${C}`);
+                        if (!set.has((c.r + 1) + ',' + c.c)) shadows.push(`inset 0 -${W}px 0 0 ${C}`);
+                        if (!set.has(c.r + ',' + (c.c - 1))) shadows.push(`inset ${W}px 0 0 0 ${C}`);
+                        if (!set.has(c.r + ',' + (c.c + 1))) shadows.push(`inset -${W}px 0 0 0 ${C}`);
+                        if (shadows.length) cell.style.boxShadow = shadows.join(', ');
+                    }
                 }
             }
-            item.appendChild(mini);
-            item.addEventListener('pointerdown', e => startDragFromLibrary(e, idx));
-            libraryList.appendChild(item);
-        });
-    }
 
-    /* ---------- 拖拽 ---------- */
-    let ghostEl = null;
+            /* ---------- 图形库 ---------- */
+            function buildLibrary() {
+                libraryList.innerHTML = '';
+                SHAPE_DEFS.forEach((shape, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'lib-item';
+                    const blocks = normalize(shape.blocks);
+                    const maxR = Math.max(...blocks.map(b => b.r));
+                    const maxC = Math.max(...blocks.map(b => b.c));
+                    const r = maxR + 1, cc = maxC + 1;
 
-    function currentCellSize() {
-        return puzzleGrid.getBoundingClientRect().width / COLS;
-    }
+                    const mini = document.createElement('div');
+                    mini.className = 'lib-mini';
+                    mini.style.gridTemplateColumns = `repeat(${cc}, 24px)`;
+                    mini.style.gridTemplateRows = `repeat(${r}, 24px)`;
+                    const filled = new Set(blocks.map(b => b.r + ',' + b.c));
+                    for (let rr = 0; rr < r; rr++) {
+                        for (let ccol = 0; ccol < cc; ccol++) {
+                            const mc = document.createElement('div');
+                            mc.className = 'lib-cell';
+                            if (filled.has(rr + ',' + ccol)) {
+                                mc.classList.add('filled');
+                                mc.style.background = shape.color;
+                            }
+                            mini.appendChild(mc);
+                        }
+                    }
+                    item.appendChild(mini);
+                    item.addEventListener('pointerdown', e => startDragFromLibrary(e, idx));
+                    libraryList.appendChild(item);
+                });
+            }
 
-    function makeGhost(blocks, color) {
-        removeGhost();
-        const maxR = Math.max(...blocks.map(b => b.r));
-        const maxC = Math.max(...blocks.map(b => b.c));
-        const size = currentCellSize();
-        const g = document.createElement('div');
-        g.className = 'ghost';
-        g.style.gridTemplateColumns = `repeat(${maxC + 1}, ${size}px)`;
-        g.style.gridTemplateRows = `repeat(${maxR + 1}, ${size}px)`;
-        const filled = new Set(blocks.map(b => b.r + ',' + b.c));
-        for (let r = 0; r <= maxR; r++) {
-            for (let c = 0; c <= maxC; c++) {
-                const cell = document.createElement('div');
-                cell.className = 'ghost-cell';
-                if (filled.has(r + ',' + c)) {
-                    cell.classList.add('filled');
-                    cell.style.background = color;
+            /* ---------- 拖拽 ---------- */
+            let ghostEl = null;
+
+            function currentCellSize() {
+                return puzzleGrid.getBoundingClientRect().width / COLS;
+            }
+
+            function makeGhost(blocks, color) {
+                removeGhost();
+                const maxR = Math.max(...blocks.map(b => b.r));
+                const maxC = Math.max(...blocks.map(b => b.c));
+                const size = currentCellSize();
+                const g = document.createElement('div');
+                g.className = 'ghost';
+                g.style.gridTemplateColumns = `repeat(${maxC + 1}, ${size}px)`;
+                g.style.gridTemplateRows = `repeat(${maxR + 1}, ${size}px)`;
+                const filled = new Set(blocks.map(b => b.r + ',' + b.c));
+                for (let r = 0; r <= maxR; r++) {
+                    for (let c = 0; c <= maxC; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'ghost-cell';
+                        if (filled.has(r + ',' + c)) {
+                            cell.classList.add('filled');
+                            cell.style.background = color;
+                        }
+                        g.appendChild(cell);
+                    }
                 }
-                g.appendChild(cell);
+                document.body.appendChild(g);
+                ghostEl = g;
             }
-        }
-        document.body.appendChild(g);
-        ghostEl = g;
-    }
 
-    function removeGhost() { if (ghostEl) { ghostEl.remove(); ghostEl = null; } }
+            function removeGhost() { if (ghostEl) { ghostEl.remove(); ghostEl = null; } }
 
-    function moveGhost(clientX, clientY) {
-        if (!ghostEl || !drag) return;
-        const size = currentCellSize();
-        const left = clientX - (drag.grab.c + 0.5) * size;
-        const top = clientY - (drag.grab.r + 0.5) * size;
-        ghostEl.style.transform = `translate(${left}px, ${top}px)`;
-    }
-
-    function startDragFromLibrary(e, idx) {
-        e.preventDefault();
-        const shape = SHAPE_DEFS[idx];
-        const blocks = normalize(shape.blocks);
-        drag = { blocks, color: shape.color, grab: blocks[0], original: null };
-        makeGhost(blocks, shape.color);
-        moveGhost(e.clientX, e.clientY);
-    }
-
-    function startDragFromGrid(e, piece, clickedR, clickedC) {
-        e.preventDefault();
-        const blocks = normalize(piece.cells);
-        const minR = Math.min(...piece.cells.map(c => c.r));
-        const minC = Math.min(...piece.cells.map(c => c.c));
-        const grab = { r: clickedR - minR, c: clickedC - minC };
-        pieces = pieces.filter(p => p.id !== piece.id);
-        drag = { blocks, color: piece.color, grab, original: piece };
-        paintPieces();
-        makeGhost(blocks, piece.color);
-        moveGhost(e.clientX, e.clientY);
-    }
-
-    function hoveredCell(clientX, clientY) {
-        const rect = puzzleGrid.getBoundingClientRect();
-        const size = currentCellSize();
-        const c = Math.floor((clientX - rect.left) / size);
-        const r = Math.floor((clientY - rect.top) / size);
-        return { r, c, inside: clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom };
-    }
-
-    function clearPreview() {
-        for (const cell of puzzleGrid.children) cell.classList.remove('preview-ok', 'preview-bad');
-    }
-
-    function updatePreview(clientX, clientY) {
-        clearPreview();
-        if (!drag) return;
-        const h = hoveredCell(clientX, clientY);
-        if (!h.inside) return;
-        const originR = h.r - drag.grab.r, originC = h.c - drag.grab.c;
-        const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
-        const ok = inBounds(cells);
-        cells.forEach(c => {
-            const cell = cellAt(c.r, c.c);
-            if (cell) cell.classList.add(ok ? 'preview-ok' : 'preview-bad');
-        });
-    }
-
-    function onPointerMove(e) {
-        if (!drag) return;
-        e.preventDefault();
-        moveGhost(e.clientX, e.clientY);
-        updatePreview(e.clientX, e.clientY);
-    }
-
-    function onPointerUp(e) {
-        if (!drag) return;
-        const h = hoveredCell(e.clientX, e.clientY);
-        let placed = false;
-        if (h.inside) {
-            const originR = h.r - drag.grab.r, originC = h.c - drag.grab.c;
-            const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
-            if (inBounds(cells)) {
-                const id = ++pieceSeq;
-                pieces.push({ id, color: drag.color, cells });
-                selectedId = id;
-                placed = true;
+            function moveGhost(clientX, clientY) {
+                if (!ghostEl || !drag) return;
+                const size = currentCellSize();
+                const left = clientX - (drag.grab.c + 0.5) * size;
+                const top = clientY - (drag.grab.r + 0.5) * size;
+                ghostEl.style.transform = `translate(${left}px, ${top}px)`;
             }
-        }
-        if (!placed && drag.original) {
-            pieces.push(drag.original);
-            selectedId = drag.original.id;
-        } else if (!placed && !drag.original && h.inside) {
-            toast('这里放不下哦', 'error');
-        }
-        drag = null;
-        removeGhost();
-        clearPreview();
-        paintPieces();
-        updateToolbar();
-        if (placed) checkFull();
-    }
 
-    function onGridPointerDown(e) {
-        const target = e.target.closest('.pcell');
-        if (!target) return;
-        const r = +target.dataset.r, c = +target.dataset.c;
-        const piece = pieces.find(p => p.cells.some(cc => cc.r === r && cc.c === c));
-        if (piece) {
-            selectedId = piece.id;
-            paintPieces();
+            function startDragFromLibrary(e, idx) {
+                e.preventDefault();
+                const shape = SHAPE_DEFS[idx];
+                const blocks = normalize(shape.blocks);
+                drag = { blocks, color: shape.color, grab: blocks[0], original: null };
+                makeGhost(blocks, shape.color);
+                moveGhost(e.clientX, e.clientY);
+            }
+
+            function startDragFromGrid(e, piece, clickedR, clickedC) {
+                e.preventDefault();
+                const blocks = normalize(piece.cells);
+                const minR = Math.min(...piece.cells.map(c => c.r));
+                const minC = Math.min(...piece.cells.map(c => c.c));
+                const grab = { r: clickedR - minR, c: clickedC - minC };
+                pieces = pieces.filter(p => p.id !== piece.id);
+                drag = { blocks, color: piece.color, grab, original: piece };
+                paintPieces();
+                makeGhost(blocks, piece.color);
+                moveGhost(e.clientX, e.clientY);
+            }
+
+            function hoveredCell(clientX, clientY) {
+                const rect = puzzleGrid.getBoundingClientRect();
+                const size = currentCellSize();
+                const c = Math.floor((clientX - rect.left) / size);
+                const r = Math.floor((clientY - rect.top) / size);
+                return { r, c, inside: clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom };
+            }
+
+            function clearPreview() {
+                for (const cell of puzzleGrid.children) cell.classList.remove('preview-ok', 'preview-bad');
+            }
+
+            function updatePreview(clientX, clientY) {
+                clearPreview();
+                if (!drag) return;
+                const h = hoveredCell(clientX, clientY);
+                if (!h.inside) return;
+                const originR = h.r - drag.grab.r, originC = h.c - drag.grab.c;
+                const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
+                const ok = inBounds(cells);
+                cells.forEach(c => {
+                    const cell = cellAt(c.r, c.c);
+                    if (cell) cell.classList.add(ok ? 'preview-ok' : 'preview-bad');
+                });
+            }
+
+            function onPointerMove(e) {
+                if (!drag) return;
+                e.preventDefault();
+                moveGhost(e.clientX, e.clientY);
+                updatePreview(e.clientX, e.clientY);
+            }
+
+            function onPointerUp(e) {
+                if (!drag) return;
+                const h = hoveredCell(e.clientX, e.clientY);
+                let placed = false;
+                if (h.inside) {
+                    const originR = h.r - drag.grab.r, originC = h.c - drag.grab.c;
+                    const cells = drag.blocks.map(b => ({ r: originR + b.r, c: originC + b.c }));
+                    if (inBounds(cells)) {
+                        const id = ++pieceSeq;
+                        pieces.push({ id, color: drag.color, cells });
+                        selectedId = id;
+                        placed = true;
+                    }
+                }
+                if (!placed && drag.original) {
+                    pieces.push(drag.original);
+                    selectedId = drag.original.id;
+                } else if (!placed && !drag.original && h.inside) {
+                    toast('这里放不下哦', 'error');
+                }
+                drag = null;
+                removeGhost();
+                clearPreview();
+                paintPieces();
+                updateToolbar();
+                if (placed) checkFull();
+            }
+
+            function onGridPointerDown(e) {
+                const target = e.target.closest('.pcell');
+                if (!target) return;
+                const r = +target.dataset.r, c = +target.dataset.c;
+                const piece = pieces.find(p => p.cells.some(cc => cc.r === r && cc.c === c));
+                if (piece) {
+                    selectedId = piece.id;
+                    paintPieces();
+                    updateToolbar();
+                    startDragFromGrid(e, piece, r, c);
+                } else {
+                    selectedId = null;
+                    paintPieces();
+                    updateToolbar();
+                }
+            }
+
+            /* ---------- 旋转 / 翻转 / 删除 ---------- */
+            function selectedPiece() { return pieces.find(p => p.id === selectedId); }
+
+            function transformSelected(fn, msg) {
+                const p = selectedPiece();
+                if (!p) return;
+                const minR = Math.min(...p.cells.map(c => c.r));
+                const minC = Math.min(...p.cells.map(c => c.c));
+                const local = p.cells.map(c => ({ r: c.r - minR, c: c.c - minC }));
+                const transformed = normalize(fn(local));
+                let cells = transformed.map(b => ({ r: minR + b.r, c: minC + b.c }));
+                const maxR = Math.max(...cells.map(c => c.r));
+                const maxC = Math.max(...cells.map(c => c.c));
+                let dr = 0, dc = 0;
+                if (maxR >= ROWS) dr = ROWS - 1 - maxR;
+                if (maxC >= COLS) dc = COLS - 1 - maxC;
+                const minNR = Math.min(...cells.map(c => c.r)) + dr;
+                const minNC = Math.min(...cells.map(c => c.c)) + dc;
+                if (minNR < 0) dr -= minNR;
+                if (minNC < 0) dc -= minNC;
+                cells = cells.map(c => ({ r: c.r + dr, c: c.c + dc }));
+                // 允许重叠：仅保证在网格内，直接应用
+                p.cells = cells;
+                paintPieces();
+                checkFull();
+            }
+
+            function rotate(local) {
+                const maxR = Math.max(...local.map(p => p.r));
+                return local.map(p => ({ r: p.c, c: maxR - p.r }));
+            }
+            function flip(local) {
+                const maxC = Math.max(...local.map(p => p.c));
+                return local.map(p => ({ r: p.r, c: maxC - p.c }));
+            }
+
+            function deleteSelected() {
+                if (selectedId == null) return;
+                pieces = pieces.filter(p => p.id !== selectedId);
+                selectedId = null;
+                paintPieces();
+                updateToolbar();
+                checkFull();
+            }
+
+            function updateToolbar() {
+                const has = selectedId != null && selectedPiece();
+                rotateBtn.disabled = !has;
+                flipBtn.disabled = !has;
+                deleteBtn.disabled = !has;
+            }
+
+            /* ---------- 拼满判定（保存要求：无重叠且填满） ---------- */
+            function isFull() {
+                return evaluate().full;
+            }
+
+            let wasFull = false;
+            function checkFull(silent) {
+                const { full, overlap } = evaluate();
+                saveBtn.disabled = !full;
+                if (overlap) puzzleHint.textContent = '有重叠，不能保存';
+                else if (full) puzzleHint.textContent = '已拼满，可保存 ✅';
+                else puzzleHint.textContent = '填满 20 格 = 5 块';
+                if (full && !wasFull && !silent) toast('🎉 拼满啦！可以保存方案', 'success');
+                wasFull = full;
+            }
+
+            /* ---------- 方案库 ---------- */
+            function clonePieces() {
+                return pieces.map(p => ({ color: p.color, cells: p.cells.map(c => ({ ...c })) }));
+            }
+
+            function saveScheme() {
+                if (!isFull()) { toast('请先填满拼摆区', 'error'); return; }
+                if (editingSchemeId != null) {
+                    const sc = schemes.find(s => s.id === editingSchemeId);
+                    if (sc) { sc.pieces = clonePieces(); toast('方案已更新', 'success'); }
+                    editingSchemeId = null;
+                } else {
+                    schemeSeq++;
+                    schemes.push({ id: schemeSeq, name: '方案 ' + schemeSeq, pieces: clonePieces() });
+                    toast('方案已保存', 'success');
+                }
+                renderSchemes();
+                updateSaveBtnLabel();
+            }
+
+            function deleteScheme(id) {
+                schemes = schemes.filter(s => s.id !== id);
+                if (editingSchemeId === id) editingSchemeId = null;
+                renderSchemes();
+                updateSaveBtnLabel();
+            }
+
+            function editScheme(id) {
+                const sc = schemes.find(s => s.id === id);
+                if (!sc) return;
+                pieces = sc.pieces.map(p => ({ id: ++pieceSeq, color: p.color, cells: p.cells.map(c => ({ ...c })) }));
+                selectedId = null;
+                editingSchemeId = id;
+                paintPieces();
+                updateToolbar();
+                checkFull(true);
+                renderSchemes();
+                updateSaveBtnLabel();
+                toast('已载入「' + sc.name + '」，修改后可再次保存', 'success');
+            }
+
+            function updateSaveBtnLabel() {
+                saveBtn.textContent = editingSchemeId != null ? '💾 更新方案' : '💾 保存方案';
+            }
+
+            function renderSchemes() {
+                schemeCount.textContent = schemes.length + ' 个';
+                schemeList.innerHTML = '';
+                if (!schemes.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'scheme-empty';
+                    empty.textContent = '还没有保存的方案，拼满拼摆区后点「保存方案」吧～';
+                    schemeList.appendChild(empty);
+                    return;
+                }
+                schemes.forEach(sc => {
+                    const card = document.createElement('div');
+                    card.className = 'scheme-card' + (sc.id === editingSchemeId ? ' editing' : '');
+
+                    const preview = document.createElement('div');
+                    preview.className = 'scheme-preview';
+                    preview.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+                    preview.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
+                    const colorMap = {};
+                    sc.pieces.forEach(p => p.cells.forEach(c => { colorMap[c.r + ',' + c.c] = p.color; }));
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const cell = document.createElement('div');
+                            cell.className = 'scheme-cell';
+                            const col = colorMap[r + ',' + c];
+                            if (col) { cell.classList.add('filled'); cell.style.background = col; }
+                            else cell.style.background = '#f4f9fd';
+                            preview.appendChild(cell);
+                        }
+                    }
+
+                    const meta = document.createElement('div');
+                    meta.className = 'scheme-meta';
+                    const name = document.createElement('div');
+                    name.className = 'scheme-name';
+                    name.textContent = sc.name + (sc.id === editingSchemeId ? '（编辑中）' : '');
+                    const actions = document.createElement('div');
+                    actions.className = 'scheme-actions';
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn primary';
+                    editBtn.textContent = '编辑';
+                    editBtn.addEventListener('click', () => editScheme(sc.id));
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'btn danger';
+                    delBtn.textContent = '删除';
+                    delBtn.addEventListener('click', () => deleteScheme(sc.id));
+                    actions.append(editBtn, delBtn);
+                    meta.append(name, actions);
+
+                    card.append(preview, meta);
+                    schemeList.appendChild(card);
+                });
+            }
+
+            /* ---------- 事件 ---------- */
+            rotateBtn.addEventListener('click', () => transformSelected(rotate, '旋转'));
+            flipBtn.addEventListener('click', () => transformSelected(flip, '翻转'));
+            deleteBtn.addEventListener('click', deleteSelected);
+            clearBtn.addEventListener('click', () => {
+                pieces = [];
+                selectedId = null;
+                editingSchemeId = null;
+                paintPieces();
+                updateToolbar();
+                checkFull();
+                renderSchemes();
+                updateSaveBtnLabel();
+                toast('已清空拼图');
+            });
+            saveBtn.addEventListener('click', saveScheme);
+
+            puzzleGrid.addEventListener('pointerdown', onGridPointerDown);
+            window.addEventListener('pointermove', onPointerMove, { passive: false });
+            window.addEventListener('pointerup', onPointerUp);
+
+            helpBtn.addEventListener('click', () => helpModal.classList.add('show'));
+            document.querySelectorAll('[data-close]').forEach(el => {
+                el.addEventListener('click', () => el.closest('.modal').classList.remove('show'));
+            });
+            helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.classList.remove('show'); });
+
+            /* ---------- 初始化 ---------- */
+            buildLibrary();
+            buildGrid();
+            renderSchemes();
             updateToolbar();
-            startDragFromGrid(e, piece, r, c);
-        } else {
-            selectedId = null;
-            paintPieces();
-            updateToolbar();
-        }
-    }
-
-    /* ---------- 旋转 / 翻转 / 删除 ---------- */
-    function selectedPiece() { return pieces.find(p => p.id === selectedId); }
-
-    function transformSelected(fn, msg) {
-        const p = selectedPiece();
-        if (!p) return;
-        const minR = Math.min(...p.cells.map(c => c.r));
-        const minC = Math.min(...p.cells.map(c => c.c));
-        const local = p.cells.map(c => ({ r: c.r - minR, c: c.c - minC }));
-        const transformed = normalize(fn(local));
-        let cells = transformed.map(b => ({ r: minR + b.r, c: minC + b.c }));
-        const maxR = Math.max(...cells.map(c => c.r));
-        const maxC = Math.max(...cells.map(c => c.c));
-        let dr = 0, dc = 0;
-        if (maxR >= ROWS) dr = ROWS - 1 - maxR;
-        if (maxC >= COLS) dc = COLS - 1 - maxC;
-        const minNR = Math.min(...cells.map(c => c.r)) + dr;
-        const minNC = Math.min(...cells.map(c => c.c)) + dc;
-        if (minNR < 0) dr -= minNR;
-        if (minNC < 0) dc -= minNC;
-        cells = cells.map(c => ({ r: c.r + dr, c: c.c + dc }));
-        // 允许重叠：仅保证在网格内，直接应用
-        p.cells = cells;
-        paintPieces();
-        checkFull();
-    }
-
-    function rotate(local) {
-        const maxR = Math.max(...local.map(p => p.r));
-        return local.map(p => ({ r: p.c, c: maxR - p.r }));
-    }
-    function flip(local) {
-        const maxC = Math.max(...local.map(p => p.c));
-        return local.map(p => ({ r: p.r, c: maxC - p.c }));
-    }
-
-    function deleteSelected() {
-        if (selectedId == null) return;
-        pieces = pieces.filter(p => p.id !== selectedId);
-        selectedId = null;
-        paintPieces();
-        updateToolbar();
-        checkFull();
-    }
-
-    function updateToolbar() {
-        const has = selectedId != null && selectedPiece();
-        rotateBtn.disabled = !has;
-        flipBtn.disabled = !has;
-        deleteBtn.disabled = !has;
-    }
-
-    /* ---------- 拼满判定（保存要求：无重叠且填满） ---------- */
-    function isFull() {
-        return evaluate().full;
-    }
-
-    let wasFull = false;
-    function checkFull(silent) {
-        const { full, overlap } = evaluate();
-        saveBtn.disabled = !full;
-        if (overlap) puzzleHint.textContent = '有重叠，不能保存';
-        else if (full) puzzleHint.textContent = '已拼满，可保存 ✅';
-        else puzzleHint.textContent = '填满 20 格 = 5 块';
-        if (full && !wasFull && !silent) toast('🎉 拼满啦！可以保存方案', 'success');
-        wasFull = full;
-    }
-
-    /* ---------- 方案库 ---------- */
-    function clonePieces() {
-        return pieces.map(p => ({ color: p.color, cells: p.cells.map(c => ({ ...c })) }));
-    }
-
-    function saveScheme() {
-        if (!isFull()) { toast('请先填满拼摆区', 'error'); return; }
-        if (editingSchemeId != null) {
-            const sc = schemes.find(s => s.id === editingSchemeId);
-            if (sc) { sc.pieces = clonePieces(); toast('方案已更新', 'success'); }
-            editingSchemeId = null;
-        } else {
-            schemeSeq++;
-            schemes.push({ id: schemeSeq, name: '方案 ' + schemeSeq, pieces: clonePieces() });
-            toast('方案已保存', 'success');
-        }
-        renderSchemes();
-        updateSaveBtnLabel();
-    }
-
-    function deleteScheme(id) {
-        schemes = schemes.filter(s => s.id !== id);
-        if (editingSchemeId === id) editingSchemeId = null;
-        renderSchemes();
-        updateSaveBtnLabel();
-    }
-
-    function editScheme(id) {
-        const sc = schemes.find(s => s.id === id);
-        if (!sc) return;
-        pieces = sc.pieces.map(p => ({ id: ++pieceSeq, color: p.color, cells: p.cells.map(c => ({ ...c })) }));
-        selectedId = null;
-        editingSchemeId = id;
-        paintPieces();
-        updateToolbar();
-        checkFull(true);
-        renderSchemes();
-        updateSaveBtnLabel();
-        toast('已载入「' + sc.name + '」，修改后可再次保存', 'success');
-    }
-
-    function updateSaveBtnLabel() {
-        saveBtn.textContent = editingSchemeId != null ? '💾 更新方案' : '💾 保存方案';
-    }
-
-    function renderSchemes() {
-        schemeCount.textContent = schemes.length + ' 个';
-        schemeList.innerHTML = '';
-        if (!schemes.length) {
-            const empty = document.createElement('div');
-            empty.className = 'scheme-empty';
-            empty.textContent = '还没有保存的方案，拼满拼摆区后点「保存方案」吧～';
-            schemeList.appendChild(empty);
-            return;
-        }
-        schemes.forEach(sc => {
-            const card = document.createElement('div');
-            card.className = 'scheme-card' + (sc.id === editingSchemeId ? ' editing' : '');
-
-            const preview = document.createElement('div');
-            preview.className = 'scheme-preview';
-            preview.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-            preview.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
-            const colorMap = {};
-            sc.pieces.forEach(p => p.cells.forEach(c => { colorMap[c.r + ',' + c.c] = p.color; }));
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'scheme-cell';
-                    const col = colorMap[r + ',' + c];
-                    if (col) { cell.classList.add('filled'); cell.style.background = col; }
-                    else cell.style.background = '#f4f9fd';
-                    preview.appendChild(cell);
-                }
-            }
-
-            const meta = document.createElement('div');
-            meta.className = 'scheme-meta';
-            const name = document.createElement('div');
-            name.className = 'scheme-name';
-            name.textContent = sc.name + (sc.id === editingSchemeId ? '（编辑中）' : '');
-            const actions = document.createElement('div');
-            actions.className = 'scheme-actions';
-            const editBtn = document.createElement('button');
-            editBtn.className = 'btn primary';
-            editBtn.textContent = '编辑';
-            editBtn.addEventListener('click', () => editScheme(sc.id));
-            const delBtn = document.createElement('button');
-            delBtn.className = 'btn danger';
-            delBtn.textContent = '删除';
-            delBtn.addEventListener('click', () => deleteScheme(sc.id));
-            actions.append(editBtn, delBtn);
-            meta.append(name, actions);
-
-            card.append(preview, meta);
-            schemeList.appendChild(card);
-        });
-    }
-
-    /* ---------- 事件 ---------- */
-    rotateBtn.addEventListener('click', () => transformSelected(rotate, '旋转'));
-    flipBtn.addEventListener('click', () => transformSelected(flip, '翻转'));
-    deleteBtn.addEventListener('click', deleteSelected);
-    clearBtn.addEventListener('click', () => {
-        pieces = [];
-        selectedId = null;
-        editingSchemeId = null;
-        paintPieces();
-        updateToolbar();
-        checkFull();
-        renderSchemes();
-        updateSaveBtnLabel();
-        toast('已清空拼图');
-    });
-    saveBtn.addEventListener('click', saveScheme);
-
-    puzzleGrid.addEventListener('pointerdown', onGridPointerDown);
-    window.addEventListener('pointermove', onPointerMove, { passive: false });
-    window.addEventListener('pointerup', onPointerUp);
-
-    helpBtn.addEventListener('click', () => helpModal.classList.add('show'));
-    document.querySelectorAll('[data-close]').forEach(el => {
-        el.addEventListener('click', () => el.closest('.modal').classList.remove('show'));
-    });
-    helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.classList.remove('show'); });
-
-    /* ---------- 初始化 ---------- */
-    buildLibrary();
-    buildGrid();
-    renderSchemes();
-    updateToolbar();
-    updateSaveBtnLabel();
-})();
-</script>
+            updateSaveBtnLabel();
+        })();
+    </script>
 </body>
+
 </html>

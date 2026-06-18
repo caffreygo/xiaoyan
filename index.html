@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>四连方 · 导航中心</title>
+  <title>四连方 · 瓷饰纹样互动课件</title>
   <style>
     * {
       margin: 0;
@@ -33,7 +34,6 @@
       overflow-x: hidden;
     }
 
-    /* 背景装饰 */
     .bg-orbs {
       position: fixed;
       inset: 0;
@@ -78,18 +78,27 @@
     }
 
     @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -20px) scale(1.05); }
-      66% { transform: translate(-20px, 30px) scale(0.95); }
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      33% {
+        transform: translate(30px, -20px) scale(1.05);
+      }
+
+      66% {
+        transform: translate(-20px, 30px) scale(0.95);
+      }
     }
 
-    /* 网格纹理 */
     .grid-overlay {
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
       background-size: 48px 48px;
       pointer-events: none;
       z-index: 0;
@@ -98,12 +107,12 @@
     .container {
       position: relative;
       z-index: 1;
+      width: 80%;
       max-width: 1080px;
       margin: 0 auto;
       padding: 60px 24px 80px;
     }
 
-    /* 页头 */
     header {
       text-align: center;
       margin-bottom: 56px;
@@ -123,14 +132,38 @@
       animation: pulse 2s ease-in-out infinite;
     }
 
-    .tetromino:nth-child(1) { background: #38bdf8; animation-delay: 0s; }
-    .tetromino:nth-child(2) { background: #a78bfa; animation-delay: 0.2s; }
-    .tetromino:nth-child(3) { background: #34d399; animation-delay: 0.4s; }
-    .tetromino:nth-child(4) { background: #fbbf24; animation-delay: 0.6s; }
+    .tetromino:nth-child(1) {
+      background: #38bdf8;
+      animation-delay: 0s;
+    }
+
+    .tetromino:nth-child(2) {
+      background: #a78bfa;
+      animation-delay: 0.2s;
+    }
+
+    .tetromino:nth-child(3) {
+      background: #34d399;
+      animation-delay: 0.4s;
+    }
+
+    .tetromino:nth-child(4) {
+      background: #fbbf24;
+      animation-delay: 0.6s;
+    }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(0.85); opacity: 0.7; }
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(0.85);
+        opacity: 0.7;
+      }
     }
 
     h1 {
@@ -147,12 +180,29 @@
     .subtitle {
       font-size: 1.05rem;
       color: var(--text-muted);
-      max-width: 480px;
+      max-width: 560px;
       margin: 0 auto;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
-    /* 卡片网格 */
+    .layer-hint {
+      display: inline-flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .layer-pill {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+    }
+
     .nav-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -187,14 +237,36 @@
       transform: translateY(-6px);
     }
 
-    .nav-card-1:hover { border-color: var(--accent-1); box-shadow: 0 20px 60px var(--glow-1); }
-    .nav-card-1::before { background: linear-gradient(135deg, var(--glow-1), transparent 60%); }
-    .nav-card-2:hover { border-color: var(--accent-2); box-shadow: 0 20px 60px var(--glow-2); }
-    .nav-card-2::before { background: linear-gradient(135deg, var(--glow-2), transparent 60%); }
-    .nav-card-3:hover { border-color: var(--accent-3); box-shadow: 0 20px 60px var(--glow-3); }
-    .nav-card-3::before { background: linear-gradient(135deg, var(--glow-3), transparent 60%); }
+    .nav-card-1:hover {
+      border-color: var(--accent-1);
+      box-shadow: 0 20px 60px var(--glow-1);
+    }
 
-    .nav-card:hover::before { opacity: 1; }
+    .nav-card-1::before {
+      background: linear-gradient(135deg, var(--glow-1), transparent 60%);
+    }
+
+    .nav-card-2:hover {
+      border-color: var(--accent-2);
+      box-shadow: 0 20px 60px var(--glow-2);
+    }
+
+    .nav-card-2::before {
+      background: linear-gradient(135deg, var(--glow-2), transparent 60%);
+    }
+
+    .nav-card-3:hover {
+      border-color: var(--accent-3);
+      box-shadow: 0 20px 60px var(--glow-3);
+    }
+
+    .nav-card-3::before {
+      background: linear-gradient(135deg, var(--glow-3), transparent 60%);
+    }
+
+    .nav-card:hover::before {
+      opacity: 1;
+    }
 
     .card-icon {
       position: relative;
@@ -208,33 +280,52 @@
       margin-bottom: 20px;
     }
 
-    .nav-card-1 .card-icon { background: rgba(56, 189, 248, 0.15); }
-    .nav-card-2 .card-icon { background: rgba(167, 139, 250, 0.15); }
-    .nav-card-3 .card-icon { background: rgba(52, 211, 153, 0.15); }
+    .nav-card-1 .card-icon {
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    .nav-card-2 .card-icon {
+      background: rgba(167, 139, 250, 0.15);
+    }
+
+    .nav-card-3 .card-icon {
+      background: rgba(52, 211, 153, 0.15);
+    }
 
     .card-tag {
       position: relative;
       display: inline-block;
       font-size: 0.72rem;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.06em;
       padding: 4px 10px;
       border-radius: 20px;
       margin-bottom: 12px;
       width: fit-content;
     }
 
-    .nav-card-1 .card-tag { color: var(--accent-1); background: rgba(56, 189, 248, 0.12); }
-    .nav-card-2 .card-tag { color: var(--accent-2); background: rgba(167, 139, 250, 0.12); }
-    .nav-card-3 .card-tag { color: var(--accent-3); background: rgba(52, 211, 153, 0.12); }
+    .nav-card-1 .card-tag {
+      color: var(--accent-1);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .nav-card-2 .card-tag {
+      color: var(--accent-2);
+      background: rgba(167, 139, 250, 0.12);
+    }
+
+    .nav-card-3 .card-tag {
+      color: var(--accent-3);
+      background: rgba(52, 211, 153, 0.12);
+    }
 
     .card-title {
       position: relative;
-      font-size: 1.35rem;
+      font-size: 1.28rem;
       font-weight: 600;
       margin-bottom: 10px;
       letter-spacing: -0.01em;
+      line-height: 1.4;
     }
 
     .card-desc {
@@ -256,11 +347,21 @@
       transition: gap 0.25s ease;
     }
 
-    .nav-card:hover .card-arrow { gap: 14px; }
+    .nav-card:hover .card-arrow {
+      gap: 14px;
+    }
 
-    .nav-card-1 .card-arrow { color: var(--accent-1); }
-    .nav-card-2 .card-arrow { color: var(--accent-2); }
-    .nav-card-3 .card-arrow { color: var(--accent-3); }
+    .nav-card-1 .card-arrow {
+      color: var(--accent-1);
+    }
+
+    .nav-card-2 .card-arrow {
+      color: var(--accent-2);
+    }
+
+    .nav-card-3 .card-arrow {
+      color: var(--accent-3);
+    }
 
     .arrow-icon {
       display: inline-flex;
@@ -273,11 +374,21 @@
       transition: transform 0.25s ease;
     }
 
-    .nav-card-1 .arrow-icon { background: rgba(56, 189, 248, 0.2); }
-    .nav-card-2 .arrow-icon { background: rgba(167, 139, 250, 0.2); }
-    .nav-card-3 .arrow-icon { background: rgba(52, 211, 153, 0.2); }
+    .nav-card-1 .arrow-icon {
+      background: rgba(56, 189, 248, 0.2);
+    }
 
-    .nav-card:hover .arrow-icon { transform: translateX(2px); }
+    .nav-card-2 .arrow-icon {
+      background: rgba(167, 139, 250, 0.2);
+    }
+
+    .nav-card-3 .arrow-icon {
+      background: rgba(52, 211, 153, 0.2);
+    }
+
+    .nav-card:hover .arrow-icon {
+      transform: translateX(2px);
+    }
 
     footer {
       position: relative;
@@ -289,14 +400,32 @@
       opacity: 0.6;
     }
 
+    @media (max-width: 1400px) {
+      .container {
+        width: 96%;
+      }
+    }
+
     @media (max-width: 640px) {
-      .container { padding: 40px 16px 60px; }
-      header { margin-bottom: 36px; }
-      .nav-grid { gap: 16px; }
-      .nav-card { padding: 24px 20px; }
+      .container {
+        padding: 40px 16px 60px;
+      }
+
+      header {
+        margin-bottom: 36px;
+      }
+
+      .nav-grid {
+        gap: 16px;
+      }
+
+      .nav-card {
+        padding: 24px 20px;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
@@ -313,46 +442,52 @@
         <span class="tetromino"></span>
         <span class="tetromino"></span>
       </div>
-      <h1>四连方</h1>
-      <p class="subtitle">探索、拼搭、旋转——三种方式体验经典四连方，选择下方入口开始</p>
+      <h1>四连方 · 瓷饰纹样互动课件</h1>
+      <p class="subtitle">从制作纹样、拼摆挑战到方案设计，三层递进体验四连方在瓷饰纹样中的应用</p>
+      <div class="layer-hint">
+        <span class="layer-pill">基础层 · 制作与纹样库</span>
+        <span class="layer-pill">提升层 · 正方形 / 长方形拼摆</span>
+        <span class="layer-pill">拓展层 · 方案保存与管理</span>
+      </div>
     </header>
 
     <nav class="nav-grid">
       <a href="a.html" class="nav-card nav-card-1">
-        <div class="card-icon">🧩</div>
-        <span class="card-tag">拼图工坊</span>
-        <h2 class="card-title">四连方挑战</h2>
-        <p class="card-desc">在网格画布上自由拼搭四连方块，锻炼空间想象力与组合逻辑，适合动手实践与创意探索。</p>
+        <div class="card-icon">🧪</div>
+        <span class="card-tag">基础层</span>
+        <h2 class="card-title">瓷饰半成品 AI 智能质检</h2>
+        <p class="card-desc">在 5×5 实验室中点击制作四连方，保存至纹样库；支持旋转、翻转与删除，最多珍藏 5 种纹样。</p>
         <span class="card-arrow">
-          进入工坊
+          进入基础层
           <span class="arrow-icon">→</span>
         </span>
       </a>
 
       <a href="b.html" class="nav-card nav-card-2">
-        <div class="card-icon">📘</div>
-        <span class="card-tag">交互课件</span>
-        <h2 class="card-title">蔚蓝创意版</h2>
-        <p class="card-desc">以清新蓝色界面呈现的教学互动课件，拖拽操作直观流畅，适合课堂演示与自主学习。</p>
+        <div class="card-icon">🪟</div>
+        <span class="card-tag">提升层</span>
+        <h2 class="card-title">瓷盘镶边纹样选型</h2>
+        <p class="card-desc">从图形库拖取五种四连方，在可调宽高的网格中拼摆；宽等于高时为正方形拼摆，否则为长方形拼摆。</p>
         <span class="card-arrow">
-          打开课件
+          进入提升层
           <span class="arrow-icon">→</span>
         </span>
       </a>
 
       <a href="c.html" class="nav-card nav-card-3">
-        <div class="card-icon">🎮</div>
-        <span class="card-tag">轻量游戏</span>
-        <h2 class="card-title">单击旋转</h2>
-        <p class="card-desc">轻快节奏的四连方小游戏，单击即可旋转方块，在有限空间内完成拼合挑战，趣味十足。</p>
+        <div class="card-icon">🎨</div>
+        <span class="card-tag">拓展层</span>
+        <h2 class="card-title">定制瓷板画纹样设计</h2>
+        <p class="card-desc">在固定 5×4 瓷板画区域拼摆纹样，图形可重复使用；拼满后可保存方案，并在方案库中编辑或删除。</p>
         <span class="card-arrow">
-          开始游戏
+          进入拓展层
           <span class="arrow-icon">→</span>
         </span>
       </a>
     </nav>
 
-    <footer>四连方 Demo 合集</footer>
+    <footer>四连方 · 瓷饰纹样互动课件</footer>
   </div>
 </body>
+
 </html>
