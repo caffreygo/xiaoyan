@@ -96,6 +96,32 @@
             color: #fff;
         }
 
+        .home-btn {
+            position: absolute;
+            right: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 12px;
+            height: 38px;
+            border-radius: 40px;
+            background: #fff;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .home-btn:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
         .controls-bar {
             display: flex;
             align-items: center;
@@ -518,6 +544,7 @@
         <div class="header">
             <button id="helpBtn" class="help-btn">?</button>
             <h1>拓展层作业：定制瓷板画纹样设计</h1>
+            <a href="index.html" class="home-btn" title="返回主页">🏠 返回主页</a>
         </div>
 
         <div class="controls-bar">

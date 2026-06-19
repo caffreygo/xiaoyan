@@ -108,27 +108,27 @@
       position: relative;
       z-index: 1;
       width: 80%;
-      max-width: 1080px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 60px 24px 80px;
+      padding: 36px 20px 44px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 56px;
+      margin-bottom: 32px;
     }
 
     .logo-block {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 20px;
+      gap: 5px;
+      margin-bottom: 10px;
     }
 
     .tetromino {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -167,36 +167,36 @@
     }
 
     h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
+      font-size: clamp(1.5rem, 4vw, 2rem);
       font-weight: 700;
       letter-spacing: -0.02em;
       background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .subtitle {
-      font-size: 1.05rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      max-width: 560px;
+      max-width: 520px;
       margin: 0 auto;
-      line-height: 1.7;
+      line-height: 1.5;
     }
 
     .layer-hint {
       display: inline-flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 20px;
+      margin-top: 12px;
     }
 
     .layer-pill {
-      font-size: 0.78rem;
+      font-size: 0.7rem;
       font-weight: 600;
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: 40px;
       border: 1px solid var(--border);
       background: rgba(255, 255, 255, 0.04);
@@ -205,18 +205,18 @@
 
     .nav-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
     }
 
     .nav-card {
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 32px 28px;
+      padding: 18px 16px;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 16px;
       text-decoration: none;
       color: inherit;
       backdrop-filter: blur(12px);
@@ -234,7 +234,7 @@
     }
 
     .nav-card:hover {
-      transform: translateY(-6px);
+      transform: translateY(-4px);
     }
 
     .nav-card-1:hover {
@@ -244,6 +244,15 @@
 
     .nav-card-1::before {
       background: linear-gradient(135deg, var(--glow-1), transparent 60%);
+    }
+
+    .nav-card-1b:hover {
+      border-color: #60a5fa;
+      box-shadow: 0 20px 60px rgba(96, 165, 250, 0.35);
+    }
+
+    .nav-card-1b::before {
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.35), transparent 60%);
     }
 
     .nav-card-2:hover {
@@ -270,18 +279,22 @@
 
     .card-icon {
       position: relative;
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 20px;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
     }
 
     .nav-card-1 .card-icon {
       background: rgba(56, 189, 248, 0.15);
+    }
+
+    .nav-card-1b .card-icon {
+      background: rgba(96, 165, 250, 0.15);
     }
 
     .nav-card-2 .card-icon {
@@ -295,18 +308,23 @@
     .card-tag {
       position: relative;
       display: inline-block;
-      font-size: 0.72rem;
+      font-size: 0.66rem;
       font-weight: 600;
       letter-spacing: 0.06em;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 20px;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
       width: fit-content;
     }
 
     .nav-card-1 .card-tag {
       color: var(--accent-1);
       background: rgba(56, 189, 248, 0.12);
+    }
+
+    .nav-card-1b .card-tag {
+      color: #60a5fa;
+      background: rgba(96, 165, 250, 0.12);
     }
 
     .nav-card-2 .card-tag {
@@ -321,38 +339,42 @@
 
     .card-title {
       position: relative;
-      font-size: 1.28rem;
+      font-size: 1.02rem;
       font-weight: 600;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       letter-spacing: -0.01em;
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
     .card-desc {
       position: relative;
-      font-size: 0.92rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      line-height: 1.65;
+      line-height: 1.5;
       flex: 1;
-      margin-bottom: 24px;
+      margin-bottom: 12px;
     }
 
     .card-arrow {
       position: relative;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.88rem;
+      gap: 6px;
+      font-size: 0.78rem;
       font-weight: 500;
       transition: gap 0.25s ease;
     }
 
     .nav-card:hover .card-arrow {
-      gap: 14px;
+      gap: 10px;
     }
 
     .nav-card-1 .card-arrow {
       color: var(--accent-1);
+    }
+
+    .nav-card-1b .card-arrow {
+      color: #60a5fa;
     }
 
     .nav-card-2 .card-arrow {
@@ -365,17 +387,21 @@
 
     .arrow-icon {
       display: inline-flex;
-      width: 28px;
-      height: 28px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       transition: transform 0.25s ease;
     }
 
     .nav-card-1 .arrow-icon {
       background: rgba(56, 189, 248, 0.2);
+    }
+
+    .nav-card-1b .arrow-icon {
+      background: rgba(96, 165, 250, 0.2);
     }
 
     .nav-card-2 .arrow-icon {
@@ -394,8 +420,8 @@
       position: relative;
       z-index: 1;
       text-align: center;
-      margin-top: 56px;
-      font-size: 0.82rem;
+      margin-top: 28px;
+      font-size: 0.75rem;
       color: var(--text-muted);
       opacity: 0.6;
     }
@@ -408,19 +434,20 @@
 
     @media (max-width: 640px) {
       .container {
-        padding: 40px 16px 60px;
+        padding: 24px 14px 32px;
       }
 
       header {
-        margin-bottom: 36px;
+        margin-bottom: 22px;
       }
 
       .nav-grid {
-        gap: 16px;
+        grid-template-columns: 1fr;
+        gap: 10px;
       }
 
       .nav-card {
-        padding: 24px 20px;
+        padding: 14px 12px;
       }
     }
   </style>
@@ -443,9 +470,9 @@
         <span class="tetromino"></span>
       </div>
       <h1>四连方 · 瓷饰纹样互动课件</h1>
-      <p class="subtitle">从制作纹样、拼摆挑战到方案设计，三层递进体验四连方在瓷饰纹样中的应用</p>
+      <p class="subtitle">从制作纹样、拼摆挑战到方案设计，三层递进体验四连方在瓷饰纹样中的应用；基础层提供练习版与预习版两种入口。</p>
       <div class="layer-hint">
-        <span class="layer-pill">基础层 · 制作与纹样库</span>
+        <span class="layer-pill">基础层 · 练习版 / 预习版</span>
         <span class="layer-pill">提升层 · 正方形 / 长方形拼摆</span>
         <span class="layer-pill">拓展层 · 方案保存与管理</span>
       </div>
@@ -454,11 +481,22 @@
     <nav class="nav-grid">
       <a href="a.html" class="nav-card nav-card-1">
         <div class="card-icon">🧪</div>
-        <span class="card-tag">基础层</span>
+        <span class="card-tag">基础层 · 练习版</span>
         <h2 class="card-title">瓷饰半成品 AI 智能质检</h2>
-        <p class="card-desc">在 5×5 实验室中点击制作四连方，保存至纹样库；支持旋转、翻转与删除，最多珍藏 5 种纹样。</p>
+        <p class="card-desc">在 5×5 实验室中点击制作四连方，自行保存至纹样库；支持旋转、翻转与删除，最多珍藏 5 种纹样。</p>
         <span class="card-arrow">
-          进入基础层
+          进入练习版
+          <span class="arrow-icon">→</span>
+        </span>
+      </a>
+
+      <a href="a1.html" class="nav-card nav-card-1b">
+        <div class="card-icon">📋</div>
+        <span class="card-tag">基础层 · 预习版</span>
+        <h2 class="card-title">瓷饰半成品 AI 智能质检</h2>
+        <p class="card-desc">纹样库已预置五种标准四连方，专注练习拼摆、旋转与翻转；无需保存，可直接对照纹样库完成操作。</p>
+        <span class="card-arrow">
+          进入预习版
           <span class="arrow-icon">→</span>
         </span>
       </a>

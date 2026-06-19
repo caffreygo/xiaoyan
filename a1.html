@@ -213,6 +213,8 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
 
         .btn {
@@ -227,6 +229,11 @@
             color: var(--text-dark);
             flex: 1;
             min-width: 120px;
+        }
+
+        .btn-clear {
+            flex: none;
+            min-width: auto;
         }
 
         .btn-primary {
@@ -249,15 +256,6 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-        }
-
-        .library-empty {
-            color: var(--text-muted);
-            font-size: 0.88rem;
-            text-align: center;
-            padding: 24px 8px;
-            border: 2px dashed #D7E0EA;
-            border-radius: 14px;
         }
 
         .shape-card {
@@ -303,12 +301,12 @@
         }
 
         .act-btn {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             line-height: 1;
             display: flex;
             align-items: center;
@@ -323,6 +321,12 @@
 
         .act-btn:active {
             transform: scale(0.9);
+        }
+
+        .act-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .act-btn.rotate {
@@ -409,10 +413,11 @@
                 <div class="panel-header">🎨 四连方实验室 (5×5)</div>
                 <div class="panel-body">
                     <div class="creator-grid" id="creatorGrid"></div>
-                    <div class="hint">✏️ 点击 4 个相邻方格 → 保存图形</div>
+                    <div class="hint">✏️ 点击 4 个相邻方格拼成四连方</div>
                     <div class="toolbar">
-                        <button id="saveShapeBtn" class="btn btn-primary">💾 保存图形</button>
-                        <button id="clearCreatorBtn" class="btn">🗑️ 清除制作区</button>
+                        <button id="rotateCreatorBtn" class="act-btn rotate" title="旋转" disabled>🔄</button>
+                        <button id="flipCreatorBtn" class="act-btn flip" title="翻转" disabled>🪞</button>
+                        <button id="clearCreatorBtn" class="btn btn-clear">🗑️ 清除制作区</button>
                     </div>
                 </div>
             </div>
@@ -420,7 +425,7 @@
             <div class="panel">
                 <div class="panel-header">
                     <span>📦 “四连方”纹样库</span>
-                    <span class="limit-counter" id="libraryCounter">0 / 5</span>
+                    <span class="limit-counter" id="libraryCounter">5 / 5</span>
                 </div>
                 <div class="panel-body">
                     <div id="libraryContainer"></div>
@@ -429,7 +434,7 @@
         </div>
 
         <div class="page-footer">
-            <a href="a1.html" class="page-switch">前往预习版 → 纹样库已预置五种方案</a>
+            <a href="a.html" class="page-switch">前往练习版 → 自行制作并保存纹样库</a>
         </div>
     </div>
 
@@ -443,14 +448,42 @@
             const MINI_CELL_SIZE = 44;
             const COLORS = ['#1E88E5', '#2E7D32', '#C62828', '#F9A825', '#8E24AA', '#D81B60', '#5E35B1'];
 
-            let selectedCells = [];   // 制作区选中的格子 [{r, c}]
-            let library = [];         // 已保存图形 [{id, color, blocks, shapeKey}]
-            let colorIndex = 0;
+            // 五种标准四连方纹样（预置）
+            const PRESET_SHAPES = [
+                {
+                    id: 'preset_I',
+                    color: '#1E88E5',
+                    blocks: [{ r: 0, c: 0 }, { r: 1, c: 0 }, { r: 2, c: 0 }, { r: 3, c: 0 }]
+                },
+                {
+                    id: 'preset_L',
+                    color: '#2E7D32',
+                    blocks: [{ r: 0, c: 0 }, { r: 1, c: 0 }, { r: 2, c: 0 }, { r: 2, c: 1 }]
+                },
+                {
+                    id: 'preset_Z',
+                    color: '#C62828',
+                    blocks: [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 2 }]
+                },
+                {
+                    id: 'preset_O',
+                    color: '#F9A825',
+                    blocks: [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 1, c: 0 }, { r: 1, c: 1 }]
+                },
+                {
+                    id: 'preset_T',
+                    color: '#8E24AA',
+                    blocks: [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }, { r: 1, c: 1 }]
+                }
+            ];
+
+            let selectedCells = [];
 
             const creatorGrid = document.getElementById('creatorGrid');
             const libraryContainer = document.getElementById('libraryContainer');
             const libraryCounter = document.getElementById('libraryCounter');
-            const saveShapeBtn = document.getElementById('saveShapeBtn');
+            const rotateCreatorBtn = document.getElementById('rotateCreatorBtn');
+            const flipCreatorBtn = document.getElementById('flipCreatorBtn');
             const clearCreatorBtn = document.getElementById('clearCreatorBtn');
             const toastEl = document.getElementById('toast');
 
@@ -463,13 +496,6 @@
                 toastTimer = setTimeout(() => { toastEl.classList.remove('show'); }, 2200);
             }
 
-            function nextColor() {
-                const color = COLORS[colorIndex % COLORS.length];
-                colorIndex++;
-                return color;
-            }
-
-            // 归一化：平移到左上角并排序
             function normalize(blocks) {
                 if (!blocks.length) return [];
                 const minR = Math.min(...blocks.map(b => b.r));
@@ -479,7 +505,6 @@
                     .sort((a, b) => (a.r !== b.r ? a.r - b.r : a.c - b.c));
             }
 
-            // 生成包含旋转 + 镜像的规范键，用于去重
             function canonicalKey(blocks) {
                 const base = normalize(blocks);
                 const variants = [];
@@ -511,7 +536,6 @@
                 return keys[0];
             }
 
-            // 判断 4 个格子是否全部连通
             function isConnected(cells) {
                 if (cells.length !== SHAPE_CELLS) return false;
                 const set = new Set(cells.map(s => `${s.r},${s.c}`));
@@ -531,12 +555,28 @@
                 return visited.size === SHAPE_CELLS;
             }
 
-            function isDuplicate(blocks) {
-                const key = canonicalKey(blocks);
-                return library.some(s => s.shapeKey === key);
+            function initLibrary() {
+                return PRESET_SHAPES.map(s => ({
+                    id: s.id,
+                    color: s.color,
+                    blocks: s.blocks.map(b => ({ ...b })),
+                    shapeKey: canonicalKey(s.blocks),
+                    preset: true
+                }));
             }
 
-            // 渲染制作区
+            let library = initLibrary();
+
+            function isValidCreatorShape() {
+                return selectedCells.length === SHAPE_CELLS && isConnected(selectedCells);
+            }
+
+            function updateCreatorToolbar() {
+                const valid = isValidCreatorShape();
+                rotateCreatorBtn.disabled = !valid;
+                flipCreatorBtn.disabled = !valid;
+            }
+
             function renderCreator() {
                 creatorGrid.innerHTML = '';
                 for (let r = 0; r < GRID_SIZE; r++) {
@@ -552,6 +592,7 @@
                         creatorGrid.appendChild(cell);
                     }
                 }
+                updateCreatorToolbar();
             }
 
             function toggleCell(r, c) {
@@ -566,36 +607,14 @@
                     selectedCells.splice(idx, 1);
                 }
                 renderCreator();
-            }
 
-            function saveShape() {
-                if (library.length >= MAX_SHAPES) {
-                    toast(`❌ 图形库已达上限（最多 ${MAX_SHAPES} 种四连方）`, true);
-                    return;
+                if (selectedCells.length === SHAPE_CELLS) {
+                    if (isConnected(selectedCells)) {
+                        toast('✅ 四连方拼接成功！');
+                    } else {
+                        toast('❌ 4 个格子必须相互连通', true);
+                    }
                 }
-                if (selectedCells.length !== SHAPE_CELLS) {
-                    toast('❌ 请选择 4 个相邻的格子', true);
-                    return;
-                }
-                if (!isConnected(selectedCells)) {
-                    toast('❌ 4 个格子必须相互连通', true);
-                    return;
-                }
-                const blocks = normalize(selectedCells);
-                if (isDuplicate(blocks)) {
-                    toast('❌ 图形库中已有相同形状（含旋转/镜像）', true);
-                    return;
-                }
-                library.push({
-                    id: Date.now() + '_' + Math.random(),
-                    color: nextColor(),
-                    blocks: blocks.map(b => ({ ...b })),
-                    shapeKey: canonicalKey(blocks)
-                });
-                selectedCells = [];
-                renderCreator();
-                renderLibrary();
-                toast(`✅ 新图形已珍藏 (${library.length}/${MAX_SHAPES})`);
             }
 
             function clearCreator() {
@@ -604,6 +623,11 @@
             }
 
             function deleteShape(id) {
+                const shape = library.find(s => s.id === id);
+                if (shape && shape.preset) {
+                    toast('❌ 预置纹样不可删除', true);
+                    return;
+                }
                 library = library.filter(s => s.id !== id);
                 renderLibrary();
                 toast('图形已删除');
@@ -617,31 +641,86 @@
                 const maxC = Math.max(...blocks.map(b => b.c));
                 return blocks.map(b => ({ r: b.r, c: maxC - b.c }));
             }
+
+            function getShapeCenter(cells) {
+                return {
+                    r: cells.reduce((s, b) => s + b.r, 0) / cells.length,
+                    c: cells.reduce((s, b) => s + b.c, 0) / cells.length
+                };
+            }
+
+            function findBestPlacement(normalizedBlocks, previousCells) {
+                const maxR = Math.max(...normalizedBlocks.map(b => b.r));
+                const maxC = Math.max(...normalizedBlocks.map(b => b.c));
+                const prevCenter = getShapeCenter(previousCells);
+                const prevMinR = Math.min(...previousCells.map(b => b.r));
+                const prevMinC = Math.min(...previousCells.map(b => b.c));
+
+                let best = null;
+                let bestCenterDist = Infinity;
+                let bestCornerDist = Infinity;
+
+                for (let topR = 0; topR <= GRID_SIZE - 1 - maxR; topR++) {
+                    for (let topC = 0; topC <= GRID_SIZE - 1 - maxC; topC++) {
+                        const placed = normalizedBlocks.map(b => ({ r: b.r + topR, c: b.c + topC }));
+                        const newCenter = getShapeCenter(placed);
+                        const centerDist =
+                            (prevCenter.r - newCenter.r) ** 2 +
+                            (prevCenter.c - newCenter.c) ** 2;
+                        const cornerDist =
+                            (prevMinR - topR) ** 2 +
+                            (prevMinC - topC) ** 2;
+
+                        if (
+                            centerDist < bestCenterDist - 1e-9 ||
+                            (Math.abs(centerDist - bestCenterDist) < 1e-9 && cornerDist < bestCornerDist)
+                        ) {
+                            bestCenterDist = centerDist;
+                            bestCornerDist = cornerDist;
+                            best = placed;
+                        }
+                    }
+                }
+
+                return best;
+            }
+
+            function transformCreator(transformFn) {
+                if (!isValidCreatorShape()) return;
+                const previousCells = selectedCells.map(b => ({ ...b }));
+                const minR = Math.min(...previousCells.map(b => b.r));
+                const minC = Math.min(...previousCells.map(b => b.c));
+                const relative = previousCells.map(b => ({ r: b.r - minR, c: b.c - minC }));
+                const transformed = normalize(transformFn(relative));
+                selectedCells = findBestPlacement(transformed, previousCells);
+                renderCreator();
+            }
+
+            function rotateCreator() {
+                transformCreator(rotateBlocks);
+            }
+
+            function flipCreator() {
+                transformCreator(flipBlocks);
+            }
             function rotateShape(id) {
                 const s = library.find(x => x.id === id);
                 if (!s) return;
                 s.blocks = normalize(rotateBlocks(s.blocks));
+                s.shapeKey = canonicalKey(s.blocks);
                 renderLibrary();
             }
             function flipShape(id) {
                 const s = library.find(x => x.id === id);
                 if (!s) return;
                 s.blocks = normalize(flipBlocks(s.blocks));
+                s.shapeKey = canonicalKey(s.blocks);
                 renderLibrary();
             }
 
-            // 渲染图形库
             function renderLibrary() {
                 libraryCounter.textContent = `${library.length} / ${MAX_SHAPES}`;
                 libraryContainer.innerHTML = '';
-
-                if (!library.length) {
-                    const empty = document.createElement('div');
-                    empty.className = 'library-empty';
-                    empty.textContent = '还没有保存的四连方，去左侧制作一个吧～';
-                    libraryContainer.appendChild(empty);
-                    return;
-                }
 
                 const grid = document.createElement('div');
                 grid.className = 'library-grid';
@@ -654,11 +733,12 @@
                     const maxC = Math.max(...shape.blocks.map(b => b.c));
                     const rows = maxR + 1;
                     const cols = maxC + 1;
+                    const cellSize = MINI_CELL_SIZE;
 
                     const mini = document.createElement('div');
                     mini.className = 'shape-mini';
-                    mini.style.gridTemplateColumns = `repeat(${cols}, ${MINI_CELL_SIZE}px)`;
-                    mini.style.gridTemplateRows = `repeat(${rows}, ${MINI_CELL_SIZE}px)`;
+                    mini.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+                    mini.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
 
                     const filled = new Set(shape.blocks.map(b => `${b.r},${b.c}`));
                     for (let r = 0; r < rows; r++) {
@@ -695,7 +775,7 @@
                     const del = document.createElement('button');
                     del.className = 'act-btn del';
                     del.textContent = '×';
-                    del.title = '删除该图形';
+                    del.title = shape.preset ? '预置纹样不可删除' : '删除该图形';
                     del.addEventListener('click', () => deleteShape(shape.id));
 
                     actions.append(rot, flp, del);
@@ -707,7 +787,8 @@
                 libraryContainer.appendChild(grid);
             }
 
-            saveShapeBtn.addEventListener('click', saveShape);
+            rotateCreatorBtn.addEventListener('click', rotateCreator);
+            flipCreatorBtn.addEventListener('click', flipCreator);
             clearCreatorBtn.addEventListener('click', clearCreator);
 
             renderCreator();
