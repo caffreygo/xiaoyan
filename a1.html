@@ -95,26 +95,6 @@
             color: var(--primary-blue);
         }
 
-        .page-footer {
-            padding: 14px 24px 20px;
-            border-top: 2px solid #EEF2F6;
-            text-align: center;
-        }
-
-        .page-switch {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-size: 0.88rem;
-            font-weight: 600;
-        }
-
-        .page-switch:hover {
-            text-decoration: underline;
-        }
-
         .workspace {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -211,9 +191,15 @@
 
         .toolbar {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
             align-items: center;
         }
 
@@ -229,6 +215,11 @@
             color: var(--text-dark);
             flex: 1;
             min-width: 120px;
+        }
+
+        .toolbar .btn {
+            flex: none;
+            min-width: auto;
         }
 
         .btn-clear {
@@ -413,11 +404,16 @@
                 <div class="panel-header">🎨 四连方实验室 (5×5)</div>
                 <div class="panel-body">
                     <div class="creator-grid" id="creatorGrid"></div>
-                    <div class="hint">✏️ 点击 4 个相邻方格拼成四连方</div>
+                    <div class="hint">✏️ 点击 4 个相邻方格 → 保存图形</div>
                     <div class="toolbar">
-                        <button id="rotateCreatorBtn" class="act-btn rotate" title="旋转" disabled>🔄</button>
-                        <button id="flipCreatorBtn" class="act-btn flip" title="翻转" disabled>🪞</button>
-                        <button id="clearCreatorBtn" class="btn btn-clear">🗑️ 清除制作区</button>
+                        <div class="toolbar-group">
+                            <button id="saveShapeBtn" class="btn btn-primary">💾 保存图形</button>
+                            <button id="clearCreatorBtn" class="btn btn-clear">🗑️ 清除制作区</button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button id="rotateCreatorBtn" class="act-btn rotate" title="旋转" disabled>🔄</button>
+                            <button id="flipCreatorBtn" class="act-btn flip" title="翻转" disabled>🪞</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -431,10 +427,6 @@
                     <div id="libraryContainer"></div>
                 </div>
             </div>
-        </div>
-
-        <div class="page-footer">
-            <a href="a.html" class="page-switch">前往练习版 → 自行制作并保存纹样库</a>
         </div>
     </div>
 
@@ -482,6 +474,7 @@
             const creatorGrid = document.getElementById('creatorGrid');
             const libraryContainer = document.getElementById('libraryContainer');
             const libraryCounter = document.getElementById('libraryCounter');
+            const saveShapeBtn = document.getElementById('saveShapeBtn');
             const rotateCreatorBtn = document.getElementById('rotateCreatorBtn');
             const flipCreatorBtn = document.getElementById('flipCreatorBtn');
             const clearCreatorBtn = document.getElementById('clearCreatorBtn');
@@ -615,6 +608,18 @@
                         toast('❌ 4 个格子必须相互连通', true);
                     }
                 }
+            }
+
+            function saveShape() {
+                if (selectedCells.length !== SHAPE_CELLS) {
+                    toast('❌ 请选择 4 个相邻的格子', true);
+                    return;
+                }
+                if (!isConnected(selectedCells)) {
+                    toast('❌ 4 个格子必须相互连通', true);
+                    return;
+                }
+                toast('❌ 右侧纹样库中已有当前方案（含旋转/镜像）', true);
             }
 
             function clearCreator() {
@@ -787,6 +792,7 @@
                 libraryContainer.appendChild(grid);
             }
 
+            saveShapeBtn.addEventListener('click', saveShape);
             rotateCreatorBtn.addEventListener('click', rotateCreator);
             flipCreatorBtn.addEventListener('click', flipCreator);
             clearCreatorBtn.addEventListener('click', clearCreator);
